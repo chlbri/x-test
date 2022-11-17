@@ -70,7 +70,7 @@ describe('Workflows', () => {
     });
   };
 
-  describe.concurrent('Workflow - 1', () => {
+  describe('Workflow - 1', () => {
     usePrepareTest();
 
     test('State is "idle"', () => {
@@ -93,9 +93,7 @@ describe('Workflows', () => {
       expect(sendParentInput).toBeCalledTimes(1);
     });
 
-    test('WAIT THROTTLE_TIME', async () => {
-      await advanceByTime(THROTTLE_TIME + 5);
-    });
+    test('WAIT THROTTLE_TIME', () => advanceByTime(THROTTLE_TIME + 5));
 
     test('State was passed by "done"', () => {
       context(false, context => context.editing);
@@ -106,7 +104,7 @@ describe('Workflows', () => {
     });
   });
 
-  describe.concurrent('Workflow - 2', () => {
+  describe('Workflow - 2', () => {
     usePrepareTest();
 
     test('State is "idle"', () => {
