@@ -11,3 +11,8 @@ test.concurrent('Context in function Helper is undefined', () => {
   const [, expect] = testGuard(inputMachine, 'isEditing');
   expect({ expected: true });
 });
+
+test.concurrent('Workflow', () => {
+  const [, expect] = testGuard(inputMachine, 'isEditing');
+  expect({ expected: true, context: { name: 'any', editing: true } });
+});

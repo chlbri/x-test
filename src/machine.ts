@@ -113,11 +113,11 @@ export const testMachine = <
   type _ActionKey = ActionKey<TContext, TEvents, TResolvedTypesMeta>;
   type _GuardKey = GuardKey<TContext, TEvents, TResolvedTypesMeta>;
 
-  const useSendParent = (action: _ActionKey) => {
+  const sendParent = (action: _ActionKey) => {
     return testSendParent(machine, action);
   };
-  const useAssign = (action: _ActionKey) => testAssign(machine, action);
-  const useGuard = (guard: _GuardKey) => testGuard(machine, guard);
+  const assign = (action: _ActionKey) => testAssign(machine, action);
+  const guard = (guard: _GuardKey) => testGuard(machine, guard);
   //TODO: Create useAsync to use machine as promise
   // #endregion
 
@@ -129,8 +129,8 @@ export const testMachine = <
     send: service.send,
     stop,
     hasTags,
-    useSendParent,
-    useAssign,
-    useGuard,
+    sendParent,
+    assign,
+    guard,
   };
 };

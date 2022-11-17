@@ -11,3 +11,13 @@ test.concurrent('Context in function Helper is undefined', () => {
   const [, expect] = testAssign(inputMachine, 'input');
   expect({ expected: { name: '' } });
 });
+
+test.concurrent('Workflow', () => {
+  const [, expect] = testAssign(inputMachine, 'input');
+  const input = 'input';
+  expect({
+    expected: { name: 'any', input, editing: true },
+    context: { name: 'any' },
+    event: { type: 'INPUT', input },
+  });
+});

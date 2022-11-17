@@ -26,37 +26,37 @@ const {
   stop,
   sender,
   send,
-  useAssign,
-  useGuard,
+  assign,
+  guard,
 } = testMachine(machine);
+
+beforeAll(() => {
+  vi.useFakeTimers();
+});
+
+afterAll(() => {
+  vi.useRealTimers();
+});
 
 describe('Acceptance', () => {
   test('Assign', () => {
-    const [acceptance] = useAssign('input');
+    const [acceptance] = assign('input');
     acceptance();
   });
 
   test('Guards', () => {
-    const [acceptance] = useGuard('isEditing');
+    const [acceptance] = guard('isEditing');
     acceptance();
   });
 
   test('Sending to parent', () => {
-    const { useSendParent } = testMachine(inputMachine);
-    const [acceptance] = useSendParent('sendParentInput');
+    const { sendParent } = testMachine(inputMachine);
+    const [acceptance] = sendParent('sendParentInput');
     acceptance();
   });
 });
 
 describe('Workflows', () => {
-  beforeAll(() => {
-    vi.useFakeTimers();
-  });
-
-  afterAll(() => {
-    vi.useRealTimers();
-  });
-
   const usePrepareTest = () => {
     beforeAll(() => {
       //Start

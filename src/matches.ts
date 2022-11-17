@@ -29,6 +29,7 @@ function buildMatches(
   return out;
 }
 
+//TODO: Create a library for matches "x-matches"
 export function matches<T extends StateValue = StateValue>(value: T) {
   const decomposeds = decompose(value);
   return (...values: MatchOptions<StateMatching<T>>[]) => {
