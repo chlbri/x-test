@@ -13,7 +13,7 @@ plugins:
 
 rules:
   indent: 0
-  '@typescript-eslint/no-explicit-any': 1
+  '@typescript-eslint/no-explicit-any': 0
   linebreak-style: 0
   quotes: 0
   semi: 0

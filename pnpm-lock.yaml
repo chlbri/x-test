@@ -1,12 +1,15 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@bemedev/decompose': ^0.1.6
   '@typescript-eslint/eslint-plugin': ^5.43.0
   '@typescript-eslint/parser': ^5.43.0
   '@vitejs/plugin-react': ^2.2.0
+  '@xstate/immer': ^0.3.1
   esbuild: ^0.15.14
   eslint: ^8.27.0
   husky: ^8.0.2
+  immer: ^9.0.16
   onchange: ^7.1.0
   prettier: ^2.7.1
   pretty-quick: ^3.1.3
@@ -19,14 +22,20 @@ specifiers:
   vite: ^3.2.4
   vite-tsconfig-paths: ^3.5.2
   vitest: ^0.25.2
+  xstate: ^4.34.0
+
+dependencies:
+  '@bemedev/decompose': 0.1.6
 
 devDependencies:
   '@typescript-eslint/eslint-plugin': 5.43.0_wze2rj5tow7zwqpgbdx2buoy3m
   '@typescript-eslint/parser': 5.43.0_e3uo4sehh4zr4i6m57mkkxxv7y
   '@vitejs/plugin-react': 2.2.0_vite@3.2.4
+  '@xstate/immer': 0.3.1_immer@9.0.16+xstate@4.34.0
   esbuild: 0.15.14
   eslint: 8.27.0
   husky: 8.0.2
+  immer: 9.0.16
   onchange: 7.1.0
   prettier: 2.7.1
   pretty-quick: 3.1.3_prettier@2.7.1
@@ -39,6 +48,7 @@ devDependencies:
   vite: 3.2.4
   vite-tsconfig-paths: 3.5.2_vite@3.2.4
   vitest: 0.25.2
+  xstate: 4.34.0
 
 packages:
 
@@ -308,6 +318,11 @@ packages:
       '@babel/helper-validator-identifier': 7.19.1
       to-fast-properties: 2.0.0
     dev: true
+
+  /@bemedev/decompose/0.1.6:
+    resolution: {integrity: sha512-l2hxdLELzOQNEzdic5kwN3issGGbAGDI84qvUIGy4+LZES8sARYoklBSUay5x0rn4ZogsmlNdYHSZ4w9IRhZOQ==}
+    engines: {node: '>=12'}
+    dev: false
 
   /@blakeembrey/deque/1.0.5:
     resolution: {integrity: sha512-6xnwtvp9DY1EINIKdTfvfeAtCYw4OqBZJhtiqkT3ivjnEfa25VQ3TsKvaFfKm8MyGIEfE95qLe+bNEt3nB0Ylg==}
@@ -640,6 +655,16 @@ packages:
       vite: 3.2.4
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /@xstate/immer/0.3.1_immer@9.0.16+xstate@4.34.0:
+    resolution: {integrity: sha512-YE+KY08IjEEmXo6XKKpeSGW4j9LfcXw+5JVixLLUO3fWQ3M95joWJ40VtGzx0w0zQSzoCNk8NgfvwWBGSbIaTA==}
+    peerDependencies:
+      immer: ^9.0.6
+      xstate: ^4.29.0
+    dependencies:
+      immer: 9.0.16
+      xstate: 4.34.0
     dev: true
 
   /acorn-jsx/5.3.2_acorn@8.8.1:
@@ -1528,6 +1553,10 @@ packages:
   /ignore/5.2.0:
     resolution: {integrity: sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==}
     engines: {node: '>= 4'}
+    dev: true
+
+  /immer/9.0.16:
+    resolution: {integrity: sha512-qenGE7CstVm1NrHQbMh8YaSzTZTFNP3zPqr3YU0S0UY441j4bJTg4A2Hh5KAhwgaiU6ZZ1Ar6y/2f4TblnMReQ==}
     dev: true
 
   /import-fresh/3.3.0:
@@ -2536,6 +2565,10 @@ packages:
 
   /wrappy/1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+    dev: true
+
+  /xstate/4.34.0:
+    resolution: {integrity: sha512-MFnYz7cJrWuXSZ8IPkcCyLB1a2T3C71kzMeShXKmNaEjBR/JQebKZPHTtxHKZpymESaWO31rA3IQ30TC6LW+sw==}
     dev: true
 
   /yallist/4.0.0:
