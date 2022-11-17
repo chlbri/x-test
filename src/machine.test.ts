@@ -4,7 +4,7 @@ import { THROTTLE_TIME } from './fixtures/constants';
 import { inputMachine } from './fixtures/input.machine';
 import { testMachine } from './machine';
 
-const emptyFn = () => vi.fn(console.log);
+const emptyFn = () => vi.fn(() => void {});
 
 const startQuery = emptyFn();
 const sendParentInput = emptyFn();
