@@ -1,0 +1,7 @@
+{
+  "material-icon-theme.files.associations": {
+    ".gitpod.temp.yaml": "Gitpod",
+    ".gitpod.yaml": "Gitpod"
+  },
+  "task.allowAutomaticTasks": "on"
+}
