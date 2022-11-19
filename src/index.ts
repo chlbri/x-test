@@ -48,7 +48,7 @@ export default function testMachine<
     TResolvedTypesMeta
   >,
 ) {
-  // @ts-ignore
+  // @ts-ignore Use the machine without asking to implement all options
   const service = interpret(machine);
 
   const start = reFunction(service, 'start');
@@ -70,9 +70,9 @@ export default function testMachine<
         : [Omit<Extract<TEvents, { type: T }>, 'type'>]
       : never;
 
-    // @ts-ignore
+    // @ts-ignore Ignore for empty tuple
     const fn = (...[event]: E) => {
-      // @ts-ignore
+      // @ts-ignore Ignore for undefined event
       service.send({ type, ...event } as any);
     };
     return fn;

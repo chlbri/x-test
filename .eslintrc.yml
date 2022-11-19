@@ -14,6 +14,10 @@ plugins:
 rules:
   indent: 0
   '@typescript-eslint/no-explicit-any': 0
+  '@typescript-eslint/ban-ts-comment':
+    - 'error'
+    - 'ts-ignore': 'allow-with-description'
+
   linebreak-style: 0
   quotes: 0
   semi: 0
