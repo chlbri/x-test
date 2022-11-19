@@ -1,4 +1,3 @@
-import { expect } from 'vitest';
 import type {
   BaseActionObject,
   EventObject,
@@ -9,8 +8,8 @@ import type {
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import { isTestHelperDefined } from './helpers';
 import type { Action, ActionKey, TestHelper } from './types';
+import { isTestHelperDefined, _expect } from './utils';
 
 export const testSendParent = <
   TContext extends object,
@@ -40,28 +39,34 @@ export const testSendParent = <
   name: ActionKey<TContext, TEvents, TResolvedTypesMeta>,
 ) => {
   const action = machine.options.actions?.[name] as any;
-  if (!action) throw 'Action not exists';
+  // if (!action) throw 'Action not exists';
 
   type Event = EventObject & Record<string, any>;
-  const send = action.event as Action<TContext, TEvents, Event> | Event;
+  const send = action?.event as Action<TContext, TEvents, Event> | Event;
 
   const acceptance = () => {
-    expect(action).toBeDefined();
-    expect(action.type).toBe('xstate.send');
-    expect(send).toBeDefined();
+    const definedCheck = action !== undefined && action !== null;
+    const typeCheck = action?.type === 'xstate.send';
+    const sendCheck = send !== undefined && send !== null;
+    const check = definedCheck && typeCheck && sendCheck;
+    if (!check) {
+      const json = JSON.stringify(action, null, 2);
+      const error = new Error(`${json} is not accepted`);
+      throw error;
+    }
   };
 
   const testExpect = (helper: TestHelper<TContext, TEvents, Event>) => {
     const checkAll = isTestHelperDefined(helper);
     if (!checkAll) return;
 
-    const { context, event, expected: result } = helper;
+    const { context, event, expected } = helper;
 
     if (typeof send === 'function') {
       const actual = send(context, event);
-      expect(actual).toEqual(result);
+      _expect(actual, expected);
     } else {
-      expect(send).toEqual(result);
+      _expect(send, expected);
     }
   };
 

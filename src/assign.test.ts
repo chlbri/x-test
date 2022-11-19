@@ -1,10 +1,10 @@
-import { expect, test } from 'vitest';
+import { test } from 'vitest';
 import { testAssign } from './assign';
 import { inputMachine } from './fixtures/input.machine';
 
-test.concurrent('Function not exists', () => {
-  const safe = () => testAssign(inputMachine, 'notExists' as any);
-  expect(safe).toThrow('Action not exists');
+test.concurrent.fails('Function not exists', () => {
+  const [acceptance] = testAssign(inputMachine, 'notExists' as any);
+  acceptance();
 });
 
 test.concurrent('Context in function Helper is undefined', () => {
@@ -19,5 +19,14 @@ test.concurrent('Workflow', () => {
     expected: { name: 'any', input, editing: true },
     context: { name: 'any' },
     event: { type: 'INPUT', input },
+  });
+});
+
+test.concurrent.fails('Workflow', () => {
+  const [, expect] = testAssign(inputMachine, 'input');
+  expect({
+    expected: { name: 'any', input: 'step1', editing: true },
+    context: { name: 'any' },
+    event: { type: 'INPUT', input: 'step2' },
   });
 });

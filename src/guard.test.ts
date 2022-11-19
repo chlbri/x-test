@@ -1,10 +1,10 @@
-import { expect, test } from 'vitest';
+import { test } from 'vitest';
 import { inputMachine } from './fixtures/input.machine';
 import { testGuard } from './guard';
 
-test.concurrent('Function not exists', () => {
-  const safe = () => testGuard(inputMachine, 'notExists' as any);
-  expect(safe).toThrow('Guard not exists');
+test.concurrent.fails('Function not exists', () => {
+  const [acceptance] = testGuard(inputMachine, 'notExists' as any);
+  acceptance();
 });
 
 test.concurrent('Context in function Helper is undefined', () => {

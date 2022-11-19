@@ -1,4 +1,3 @@
-import { expect, vi } from 'vitest';
 import type {
   BaseActionObject,
   EventObject,
@@ -10,8 +9,8 @@ import type {
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import { isTestHelperDefined } from './helpers';
 import type { Action, GuardKey, TestHelper } from './types';
+import { isTestHelperDefined, _expect } from './utils';
 
 export const testGuard = <
   TContext extends object,
@@ -45,11 +44,16 @@ export const testGuard = <
     TEvents,
     boolean
   >;
-  if (!guard) throw 'Guard not exists';
-  const mockFn = vi.fn(guard);
 
   const acceptance = () => {
-    expect(guard).toBeInstanceOf(Function);
+    const definedCheck = guard !== undefined && guard !== null;
+    const typeCheck = typeof guard === 'function';
+    const check = definedCheck && typeCheck;
+    if (!check) {
+      const json = JSON.stringify(guard, null, 2);
+      const error = new Error(`${json} is not accepted`);
+      throw error;
+    }
   };
 
   const testExpect = (helper: TestHelper<TContext, TEvents, boolean>) => {
@@ -57,8 +61,9 @@ export const testGuard = <
     if (!checkAll) return;
 
     const { context, event, expected } = helper;
-    expect(mockFn(context, event)).toEqual(expected);
+    const actual = guard(context, event);
+    _expect(actual, expected);
   };
 
-  return [acceptance, testExpect, mockFn] as const;
+  return [acceptance, testExpect] as const;
 };

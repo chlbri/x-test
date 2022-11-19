@@ -6,6 +6,31 @@ import type {
   StateMachine,
 } from 'xstate';
 
+export type LengthOf<T> = T extends ReadonlyArray<unknown>
+  ? T['length']
+  : number;
+
+// #region Tuplify Union
+// #region Preparation
+type _UnionToIntersection<U> = (
+  U extends unknown ? (k: U) => void : never
+) extends (k: infer I) => void
+  ? I
+  : never;
+type _LastOf<T> = _UnionToIntersection<
+  T extends unknown ? () => T : never
+> extends () => infer R
+  ? R
+  : never;
+type _Push<T extends unknown[], V> = [...T, V];
+type _TuplifyUnionBoolean<T> = [T] extends [never] ? true : false;
+// #endregion
+
+export type TuplifyUnion<T> = true extends _TuplifyUnionBoolean<T>
+  ? []
+  : _Push<TuplifyUnion<Exclude<T, _LastOf<T>>>, _LastOf<T>>;
+// #endregion
+
 export type Action<
   Context extends object = object,
   Events extends EventObject = EventObject,
