@@ -1,4 +1,3 @@
-import { expect, vi } from 'vitest';
 import type {
   BaseActionObject,
   EventObject,
@@ -9,8 +8,8 @@ import type {
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import { isTestHelperDefined } from './helpers';
 import type { ActionKey, TestHelper } from './types';
+import { isTestHelperDefined, _expect } from './utils';
 
 export const testAssign = <
   TContext extends object,
@@ -40,14 +39,18 @@ export const testAssign = <
   name: ActionKey<TContext, TEvents, TResolvedTypesMeta>,
 ) => {
   const action = machine.options.actions?.[name] as any;
-  const fn = action?.assignment;
-  const mockFn = vi.fn(fn);
-  if (!fn) throw 'Action not exists';
+  const assign = action?.assignment;
 
   const acceptance = () => {
-    expect(action).toBeDefined();
-    expect(action?.type).toBe('xstate.assign');
-    expect(mockFn).toBeDefined();
+    const definedCheck = action !== undefined && action !== null;
+    const typeCheck = action?.type === 'xstate.assign';
+    const assignCheck = assign !== undefined && assign !== null;
+    const check = definedCheck && typeCheck && assignCheck;
+    if (!check) {
+      const json = JSON.stringify(action, null, 2);
+      const error = new Error(`${json} is not accepted`);
+      throw error;
+    }
   };
 
   const testExpect = (helper: TestHelper<TContext, TEvents, TContext>) => {
@@ -55,8 +58,9 @@ export const testAssign = <
     if (!checkAll) return;
 
     const { context, event, expected } = helper;
-    expect(mockFn(context, event)).toEqual(expected);
+    const actual = assign(context, event);
+    _expect(actual, expected);
   };
 
-  return [acceptance, testExpect, mockFn] as const;
+  return [acceptance, testExpect] as const;
 };

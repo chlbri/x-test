@@ -1,5 +1,12 @@
 {
+  "name": "@bemedev/x-interpret-react",
   "version": "0.0.4",
+  "description": "Test XState Machine sequentially",
+  "author": {
+    "email": "bri_lvi@icloud.com",
+    "name": "chlbri",
+    "url": "https://bemedev.vercel.app"
+  },
   "license": "MIT",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -14,6 +21,7 @@
     "config": "pnpm install",
     "rollup": "rollup -c",
     "prepare": "husky install",
+    "updateDependencies": "pnpm update --latest",
     "build": "rm -rf lib && pnpm run rollup",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
@@ -26,15 +34,13 @@
     "postpublish": "git fetch & git pull",
     "prepublishOnly": "pnpm run build && pnpm run lint"
   },
-  "name": "@bemedev/x-interpret-react",
-  "author": "chlbri <bri_lvi@icloud.com>",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
     "@vitejs/plugin-react": "^2.2.0",
     "@xstate/immer": "^0.3.1",
     "esbuild": "^0.15.14",
-    "eslint": "^8.27.0",
+    "eslint": "^8.28.0",
     "husky": "^8.0.2",
     "immer": "^9.0.16",
     "onchange": "^7.1.0",
@@ -44,7 +50,6 @@
     "rollup-plugin-dts": "^5.0.0",
     "rollup-plugin-esbuild": "^5.0.0",
     "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript2": "^0.34.1",
     "typescript": "^4.9.3",
     "vite": "^3.2.4",
     "vite-tsconfig-paths": "^3.5.2",
@@ -52,6 +57,15 @@
     "xstate": "^4.34.0"
   },
   "dependencies": {
-    "@bemedev/decompose": "^0.1.6"
+    "@bemedev/x-matches": "^0.0.3",
+    "dequal": "^2.0.3"
+  },
+  "peerDependencies": {
+    "xstate": "^4.30.6"
+  },
+  "peerDependenciesMeta": {
+    "xstate": {
+      "optional": true
+    }
   }
 }

@@ -1,11 +1,11 @@
-import { describe, expect, test } from 'vitest';
+import { describe, test } from 'vitest';
 import { inputMachine } from './fixtures/input.machine';
 import { testSendParent } from './sendParent';
 
 describe('Acceptance', () => {
-  test.concurrent('Function not exists', () => {
-    const safe = () => testSendParent(inputMachine, 'notExists' as any);
-    expect(safe).toThrow('Action not exists');
+  test.concurrent.fails('Function not exists', () => {
+    const [acceptance] = testSendParent(inputMachine, 'notExists' as any);
+    acceptance();
   });
 
   test.concurrent('Acceptance', () => {
@@ -25,18 +25,26 @@ describe('Workflows', () => {
     inputMachine,
     'sendParentInput',
   );
-  test('Object', () => {
+  test.concurrent('Object', () => {
     expectObject({
       expected: { type: 'START_QUERY' },
       context: { name: 'any' },
     });
   });
 
-  test('Function', () => {
+  test.concurrent('Function', () => {
     expectFunction({
-      expected: { type: 'CHILD/(machine)/INPUT' },
+      expected: { type: 'CHILD/(machine)/INPUT', input: undefined },
       context: { name: '(machine)' },
       event: { type: 'INPUT' },
+    });
+  });
+
+  test.concurrent.fails('Function - 2', () => {
+    expectFunction({
+      expected: { type: 'CHILD/(machine)/INPUT', input: 'nothing' },
+      context: { name: '(machine)' },
+      event: { type: 'INPUT', input: 'something' },
     });
   });
 });
