@@ -3,5 +3,6 @@
     ".gitpod.temp.yaml": "Gitpod",
     ".gitpod.yaml": "Gitpod"
   },
-  "task.allowAutomaticTasks": "on"
+  "task.allowAutomaticTasks": "on",
+  "githubPullRequests.ignoredPullRequestBranches": ["dev"]
 }
