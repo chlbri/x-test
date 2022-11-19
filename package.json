@@ -1,6 +1,6 @@
 {
-  "name": "@bemedev/x-interpret-react",
-  "version": "0.0.4",
+  "name": "@bemedev/x-test",
+  "version": "0.0.1",
   "description": "Test XState Machine sequentially",
   "author": {
     "email": "bri_lvi@icloud.com",
@@ -11,6 +11,15 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "module": "lib/index.mjs",
+  "keywords": [
+    "XState",
+    "test",
+    "assertion",
+    "State machine",
+    "Finite state",
+    "StateCharts",
+    "TDD"
+  ],
   "files": [
     "lib"
   ],

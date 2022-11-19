@@ -26,7 +26,7 @@ const {
   stop,
   sender,
   send,
-  assign,
+  assignAction,
   guard,
 } = testMachine(machine);
 
@@ -40,7 +40,7 @@ afterAll(() => {
 
 describe('Acceptance', () => {
   test.concurrent('Assign', () => {
-    const [acceptance] = assign('input');
+    const [acceptance] = assignAction('input');
     acceptance();
   });
 
@@ -50,8 +50,8 @@ describe('Acceptance', () => {
   });
 
   test.concurrent('Sending to parent', () => {
-    const { sendParent } = testMachine(inputMachine);
-    const [acceptance] = sendParent('sendParentInput');
+    const { sendAction } = testMachine(inputMachine);
+    const [acceptance] = sendAction('sendParentInput');
     acceptance();
   });
 });

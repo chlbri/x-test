@@ -18,7 +18,7 @@ import {
 } from 'xstate';
 import { testAssign } from './assign';
 import { testGuard } from './guard';
-import { testSendParent } from './sendParent';
+import { testSend } from './send';
 import type { ActionKey, GuardKey, LengthOf, TuplifyUnion } from './types';
 import { reFunction, _expect } from './utils';
 
@@ -112,19 +112,43 @@ export default function testMachine<
   type _ActionKey = ActionKey<TContext, TEvents, TResolvedTypesMeta>;
   type _GuardKey = GuardKey<TContext, TEvents, TResolvedTypesMeta>;
 
-  const sendParent = (action: _ActionKey) => {
-    return testSendParent(machine, action);
-  };
   /**
+   * Test a sendParent action from the machine
+   * @param sender id of the action
+   * @returns A tuple of 2 :
    *
-   * @param action id of the action
-   * @returns a tuple of 2 :
+   *
    * => A function to run directly inside your test to determine if the action is defined
-   * => A function "expect" as a surcharge of your test fr
+   *
+   * => A function test the sender
    */
-  const assign = (action: _ActionKey) => testAssign(machine, action);
+  const sendAction = (sender: _ActionKey) => {
+    return testSend(machine, sender);
+  };
+
+  /**
+   * Test a assign action from the machine
+   * @param action id of the action
+   * @returns A tuple of 2 :
+   *
+   *
+   * => A function to run directly inside your test to determine if the action is defined
+   *
+   * => A function test the assigner
+   */
+  const assignAction = (action: _ActionKey) => testAssign(machine, action);
+
+  /**
+   * Test a guard from the machine
+   * @param guard id of the guard
+   * @returns A tuple of 2 :
+   *
+   *
+   * => A function to run directly inside your test to determine if the guard is defined
+   *
+   * => A function test the guard
+   */
   const guard = (guard: _GuardKey) => testGuard(machine, guard);
-  //TODO: Create useAsync to use machine as promise
   // #endregion
 
   return {
@@ -135,13 +159,13 @@ export default function testMachine<
     send: service.send,
     stop,
     hasTags,
-    sendParent,
-    assign,
+    sendAction,
+    assignAction,
     guard,
   };
 }
 
 export * from './assign';
 export * from './guard';
-export * from './sendParent';
+export * from './send';
 export * from './types';

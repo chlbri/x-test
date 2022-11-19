@@ -11,7 +11,7 @@ import type {
 import type { Action, ActionKey, TestHelper } from './types';
 import { isTestHelperDefined, _expect } from './utils';
 
-export const testSendParent = <
+export const testSend = <
   TContext extends object,
   TEvents extends EventObject = EventObject,
   TTypestate extends Typestate<TContext> = {

@@ -51,6 +51,6 @@ const bundles = (...values) => {
   return out;
 };
 
-const config = bundles('assign', 'guard', 'index', 'sendParent');
+const config = bundles('assign', 'guard', 'index', 'send');
 
 export default config;
