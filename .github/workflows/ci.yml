@@ -1,6 +1,6 @@
 name: CI
 
-on: 
+on:
   push:
     branches-ignore:
       - master
@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -25,7 +24,7 @@ jobs:
         uses: pnpm/action-setup@v2.2.2
         with:
           version: latest
-      
+
       - name: Setup cache
         uses: actions/cache@v3
         with:
@@ -36,18 +35,17 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm i --offline
 
       - name: Lint
         run: pnpm lint
 
       - name: Test
-        run: pnpm run test  
-
+        run: pnpm run test
 
   # clean:
   #   runs-on: ubuntu-latest
-  #   needs: test 
+  #   needs: test
 
   #   steps:
   #     - name: Some
