@@ -18,8 +18,12 @@ const bundleDts = value => ({
 /** @type {() => import('rollup').RollupOptions} */
 const bundleJS = () => {
   return {
-    input: `src/index.ts`,
-    external: ['@bemedev/x-matches', 'xstate', 'dequal'],
+    input: [
+      `src/index.ts`,
+      'src/actions/index.ts',
+      'src/invokeds/index.ts',
+    ],
+    external: ['@bemedev/x-matches', 'xstate', 'dequal', 'deepmerge'],
     plugins: [esbuild(), terser({})],
     output: [
       {
@@ -38,6 +42,7 @@ const bundleJS = () => {
         preserveModulesRoot: 'src',
         preserveModules: true,
         entryFileNames: '[name].mjs',
+        exports: 'named',
       },
     ],
   };
@@ -52,11 +57,10 @@ const bundles = (...values) => {
 };
 
 const config = bundles(
-  'actions/assign',
+  'actions/index',
   'guard',
   'index',
-  'actions/send',
-  'invokeds/promise',
+  'invokeds/index',
 );
 
 export default config;

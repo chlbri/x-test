@@ -12,8 +12,7 @@ import {
   TypegenEnabled,
   Typestate,
 } from 'xstate';
-import { testAssign } from './actions/assign';
-import { testSend } from './actions/send';
+import { testAssign, testSend } from './actions';
 import { testGuard } from './guard';
 import { testPromise } from './invokeds';
 import type {
