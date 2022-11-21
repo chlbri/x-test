@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { dequal } from 'dequal';
 import { describe, expect, test, vi } from 'vitest';
 import { AnyStateMachine, StateNode } from 'xstate';
 import { inputMachine } from './fixtures/input.machine';
@@ -9,12 +11,12 @@ import {
   trueGuard,
 } from './utils';
 
-describe('Accpetance', () => {
+describe('Acceptance', () => {
   test.concurrent('Function is defined', () => {
     expect(mockMachine).toBeDefined();
   });
 
-  test.concurrent('Always return machine', () => {
+  test.concurrent('Always returns machine', () => {
     const fn = vi.fn(mockMachine);
     fn(inputMachine as AnyStateMachine);
     expect(fn).toHaveReturnedWith(expect.any(StateNode));
@@ -36,7 +38,8 @@ describe('Workflow', () => {
     expect(options).toBeDefined();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const functions = Object.values(options!);
-    expect(functions).toContainEqual(contains);
+    const check = functions.every(fn => dequal(fn, contains));
+    expect(check).toBe(true);
   };
 
   test.concurrent('All Guards return true by default', () => {
@@ -47,11 +50,39 @@ describe('Workflow', () => {
     useTest('actions', emptyAction);
   });
 
-  test.concurrent(`All delays are "${EMPTY_DELAY}" by default`, () => {
-    useTest('delays', EMPTY_DELAY);
-  });
+  test.concurrent(
+    `All delays are equal to "${EMPTY_DELAY}" by default`,
+    () => {
+      useTest('delays', EMPTY_DELAY);
+    },
+  );
 
   test.concurrent('All services are empty by default', () => {
     useTest('services', emptyService);
+  });
+
+  describe("With user's config, it will deepmerge", () => {
+    const machine = mockMachine(inputMachine, {
+      options: { actions: { input: () => 'lastName' } },
+    });
+
+    test.concurrent('The defined action is respected', () => {
+      const fn = machine.options.actions?.input as () => any;
+      const actual = fn();
+      expect(actual).not.toBe('firstName');
+      expect(actual).toBe('lastName');
+    });
+
+    test.concurrent('Other actions are default', () => {
+      const check2 = Object.values(machine.options.actions!).every(fn =>
+        dequal(fn, emptyAction),
+      );
+      expect(check2).toBe(false);
+      const entries = Object.entries(machine.options.actions!);
+      const filtered = entries.filter(([key]) => key !== 'input');
+      const actions = filtered.map(([, value]) => value);
+      const check = actions.every(fn => dequal(fn, emptyAction));
+      expect(check).toBe(true);
+    });
   });
 });

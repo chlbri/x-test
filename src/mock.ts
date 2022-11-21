@@ -8,6 +8,7 @@ import type {
   ServiceMap,
   StateMachine,
   TypegenDisabled,
+  TypegenEnabled,
   Typestate,
 } from 'xstate';
 import {
@@ -94,8 +95,8 @@ export function mockMachine<
   },
 ) {
   const _options: any = merge(
-    config?.options ?? {},
     buildMockConfig(machine),
+    config?.options ?? {},
   );
   const _machine = machine.withConfig(_options, config?.context);
 
@@ -108,7 +109,7 @@ export function mockMachine<
     TAction,
     TServiceMap,
     ResolveTypegenMeta<
-      TypegenDisabled,
+      TypegenEnabled,
       NoInfer<TEvents>,
       TAction,
       TServiceMap
