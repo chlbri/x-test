@@ -41,24 +41,23 @@ afterAll(() => {
 
 describe('Acceptance', () => {
   test.concurrent('Assign', () => {
-    const { createAcceptance } = assignAction('input');
-    const acceptance = createAcceptance();
+    const [acceptance] = assignAction('input');
     acceptance();
   });
 
   test.concurrent('Guards', () => {
-    const { createAcceptance } = guard('isEditing');
-    createAcceptance()();
+    const [acceptance] = guard('isEditing');
+    acceptance();
   });
 
   test.concurrent('Promises', () => {
-    const { createAcceptance } = promise('fetch');
-    createAcceptance()();
+    const [acceptance] = promise('fetch');
+    acceptance();
   });
 
   test.concurrent('Send action', () => {
     const { sendAction } = testMachine(inputMachine);
-    const { createAcceptance: acceptance } = sendAction('sendParentInput');
+    const [acceptance] = sendAction('sendParentInput');
     acceptance();
   });
 });
@@ -80,33 +79,33 @@ describe('Workflows', () => {
   describe('Workflow - 1', () => {
     usePrepareTest();
 
-    test('State is "idle"', () => {
+    test('#1 State is "idle"', () => {
       matches('idle');
     });
 
-    test('Property "editing" is undefined', () => {
+    test('#2 Property "editing" is undefined', () => {
       context(undefined, context => context.editing);
     });
 
-    test('Send Input', () => {
+    test('#3 Send Input', () => {
       send({ type: 'INPUT', input: 'name' });
     });
 
-    test('Property "editing" is true', () => {
+    test('#4 Property "editing" is true', () => {
       context(true, context => context.editing);
     });
 
-    test('Input is sent to parent', () => {
+    test('#5 Input is sent to parent', () => {
       expect(sendParentInput).toBeCalledTimes(1);
     });
 
-    test('WAIT THROTTLE_TIME', () => advanceByTime(THROTTLE_TIME + 5));
+    test('#6 WAIT THROTTLE_TIME', () => advanceByTime(THROTTLE_TIME + 5));
 
-    test('State was passed by "done"', () => {
+    test('#7 State was passed by "done"', () => {
       context(false, context => context.editing);
     });
 
-    test('The machine starts the query', () => {
+    test('#8 The machine starts the query', () => {
       expect(startQuery).toBeCalledTimes(1);
     });
   });
@@ -114,37 +113,37 @@ describe('Workflows', () => {
   describe('Workflow - 2', () => {
     usePrepareTest();
 
-    test('State is "idle"', () => {
+    test('#1 State is "idle"', () => {
       matches('idle');
     });
 
-    test('WAIT THROTTLE_TIME', async () => {
+    test('#2 WAIT THROTTLE_TIME', async () => {
       await advanceByTime(THROTTLE_TIME + 5);
     });
 
-    test('Nothing is inputed', () => {
+    test('#3 Nothing is inputed', () => {
       context(undefined, context => context.editing);
       context(undefined, context => context.input);
     });
 
-    test('Nothing is sent', () => {
+    test('#4 Nothing is sent', () => {
       expect(sendParentInput).not.toBeCalled();
     });
 
-    test('The state has a tag "busy"', () => {
+    test('#5 The state has a tag "busy"', () => {
       hasTags('busy');
     });
 
-    test('Send a input "bemedev" with function sender', () => {
+    test('#6 Send a input "bemedev" with function sender', () => {
       const input = sender('INPUT');
       input({ input: 'bemedev' });
     });
 
-    test('Input is edited', () => {
+    test('#7 Input is edited', () => {
       context(true, context => context.editing);
     });
 
-    test('Input is defined to "bemedev"', () => {
+    test('#8 Input is defined to "bemedev"', () => {
       context({ name: 'test', input: 'bemedev', editing: true });
     });
   });

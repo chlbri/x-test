@@ -44,34 +44,24 @@ export const testPromise = <
   type Out = Action<TContext, TEvents, PR>;
   const promise = service as Out;
 
-  const createAcceptance = (...tests: OptionalTester<Out>[]) => {
-    const fn = () => {
-      const check = service !== undefined;
-      _expect(check, true, () => `${name} is not accepted`);
+  const acceptance = (...tests: OptionalTester<Out>[]) => {
+    const check = service !== undefined;
+    _expect(check, true, () => `${name} is not accepted`);
 
-      tests.forEach(test => test(promise));
-    };
-    return fn;
+    tests.forEach(test => test(promise));
   };
 
-  const createExpect = (
+  const expect = async (
     helper: TestHelper<TContext, TEvents, Awaited<PR>>,
   ) => {
-    const fn = async () => {
-      const checkAll = isTestHelperDefined(helper);
-      if (!checkAll) return;
+    const checkAll = isTestHelperDefined(helper);
+    if (!checkAll) return;
 
-      const { context, event, expected } = helper;
+    const { context, event, expected } = helper;
 
-      const actual = await promise(context, event);
-      _expect(actual, expected);
-    };
-    return fn;
+    const actual = await promise(context, event);
+    _expect(actual, expected);
   };
 
-  return {
-    createAcceptance,
-    createExpect,
-    promise,
-  } as const;
+  return [acceptance, expect, promise] as const;
 };

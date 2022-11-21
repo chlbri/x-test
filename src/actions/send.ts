@@ -39,39 +39,31 @@ export const testSend = <
   name: ActionKey<typeof machine>,
 ) => {
   const action = machine.options.actions?.[name] as any;
-  // if (!action) throw 'Action not exists';
 
   type Event = EventObject & Record<string, any>;
   const send = action?.event as Action<TContext, TEvents, Event> | Event;
 
-  const createAcceptance = () => {
-    const fn = () => {
-      const definedCheck = action !== undefined && action !== null;
-      const typeCheck = action?.type === 'xstate.send';
-      const sendCheck = send !== undefined && send !== null;
-      const check = definedCheck && typeCheck && sendCheck;
-      _expect(check, true, () => `${name} is not accepted`);
-    };
-    return fn;
+  const accpetance = () => {
+    const definedCheck = action !== undefined && action !== null;
+    const typeCheck = action?.type === 'xstate.send';
+    const sendCheck = send !== undefined && send !== null;
+    const check = definedCheck && typeCheck && sendCheck;
+    _expect(check, true, () => `${name} is not accepted`);
   };
 
-  const createExpect = (helper: TestHelper<TContext, TEvents, Event>) => {
-    const fn = () => {
-      const checkAll = isTestHelperDefined(helper);
-      if (!checkAll) return;
+  const expect = (helper: TestHelper<TContext, TEvents, Event>) => {
+    const checkAll = isTestHelperDefined(helper);
+    if (!checkAll) return;
 
-      const { context, event, expected } = helper;
+    const { context, event, expected } = helper;
 
-      if (typeof send === 'function') {
-        const actual = send(context, event);
-        _expect(actual, expected);
-      } else {
-        _expect(send, expected);
-      }
-    };
-
-    return fn;
+    if (typeof send === 'function') {
+      const actual = send(context, event);
+      _expect(actual, expected);
+    } else {
+      _expect(send, expected);
+    }
   };
 
-  return { createAcceptance, createExpect, send } as const;
+  return [accpetance, expect, send] as const;
 };

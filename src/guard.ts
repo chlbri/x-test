@@ -47,32 +47,20 @@ export const testGuard = <
   type Guard = Action<TContext, TEvents, boolean>;
   const guard = machine.options.guards?.[name] as Guard;
 
-  const createAcceptance = (...tests: OptionalTester<Guard>[]) => {
-    const fn = () => {
-      const check = guard !== undefined;
-      _expect(check, true, () => `${name} is not accepted`);
-      tests.forEach(test => test(guard));
-    };
-    return fn;
+  const acceptance = (...tests: OptionalTester<Guard>[]) => {
+    const check = guard !== undefined;
+    _expect(check, true, () => `${name} is not accepted`);
+    tests.forEach(test => test(guard));
   };
 
-  const createExpect = (
-    helper: TestHelper<TContext, TEvents, boolean>,
-  ) => {
-    const fn = () => {
-      const checkAll = isTestHelperDefined(helper);
-      if (!checkAll) return;
+  const expect = (helper: TestHelper<TContext, TEvents, boolean>) => {
+    const checkAll = isTestHelperDefined(helper);
+    if (!checkAll) return;
 
-      const { context, event, expected } = helper;
-      const actual = guard(context, event);
-      _expect(actual, expected);
-    };
-    return fn;
+    const { context, event, expected } = helper;
+    const actual = guard(context, event);
+    _expect(actual, expected);
   };
 
-  return {
-    createAcceptance,
-    createExpect,
-    guard,
-  } as const;
+  return [acceptance, expect, guard] as const;
 };

@@ -2,33 +2,27 @@ import { test } from 'vitest';
 import { inputMachine } from '../fixtures/input.machine';
 import { testAssign } from './assign';
 
-test.concurrent.fails('Function not exists', () => {
-  const { createAcceptance } = testAssign(
-    inputMachine,
-    'notExists' as any,
-  );
-  const acceptance = createAcceptance();
+test.concurrent.fails('Function is not defined in the machine', () => {
+  const [acceptance] = testAssign(inputMachine, 'notExists' as any);
   acceptance();
 });
 
-const { createExpect } = testAssign(inputMachine, 'input');
-test.concurrent(
-  'Context in function Helper is undefined',
-  createExpect({ expected: { name: '' } }),
+const [, expect] = testAssign(inputMachine, 'input');
+
+test.concurrent('Context and event are not defined', () =>
+  expect({ expected: { name: '' } }),
 );
 
-test.concurrent(
-  'Workflow',
-  createExpect({
+test.concurrent('#1 Workflow', () =>
+  expect({
     expected: { name: 'any', input: 'input', editing: true },
     context: { name: 'any' },
     event: { type: 'INPUT', input: 'input' },
   }),
 );
 
-test.concurrent.fails(
-  'Workflow',
-  createExpect({
+test.concurrent.fails('#2 Workflow', () =>
+  expect({
     expected: { name: 'any', input: 'step1', editing: true },
     context: { name: 'any' },
     event: { type: 'INPUT', input: 'step2' },
