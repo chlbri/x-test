@@ -20,7 +20,13 @@ export const inputMachine = createMachine(
     predictableActionArguments: true,
     preserveActionOrder: true,
     tsTypes: {} as import('./input.machine.typegen').Typegen0,
-    schema: { context: {} as Context, events: {} as Events },
+    schema: {
+      context: {} as Context,
+      events: {} as Events,
+      services: {} as {
+        fetch: { data: number };
+      },
+    },
     initial: 'idle',
     on: {
       INPUT: {
@@ -42,6 +48,9 @@ export const inputMachine = createMachine(
       },
       done: {
         entry: 'resetEdititng',
+        invoke: {
+          src: 'fetch',
+        },
         always: {
           actions: ['startQuery'],
           target: 'idle',
@@ -73,6 +82,10 @@ export const inputMachine = createMachine(
     },
 
     delays: { THROTTLE_TIME },
+
+    services: {
+      fetch: async () => 3,
+    },
   },
 );
 
@@ -82,4 +95,5 @@ export type Options = Exclude<
   InternalMachineOptions<Context, Events, TResolvedTypesMeta, true>,
   undefined
 >;
+
 // const test2 :T = {}

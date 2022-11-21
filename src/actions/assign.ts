@@ -5,23 +5,17 @@ import type {
   ResolveTypegenMeta,
   ServiceMap,
   StateMachine,
-  StateValue,
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import type {
-  Action,
-  GuardKey,
-  OptionalTester,
-  TestHelper,
-} from './types';
-import { isTestHelperDefined, _expect } from './utils';
+import type { Action, ActionKey, TestHelper } from '../types';
+import { isTestHelperDefined, _expect } from '../utils';
 
-export const testGuard = <
+export const testAssign = <
   TContext extends object,
   TEvents extends EventObject = EventObject,
   TTypestate extends Typestate<TContext> = {
-    value: StateValue;
+    value: any;
     context: TContext;
   },
   TAction extends BaseActionObject = BaseActionObject,
@@ -42,37 +36,36 @@ export const testGuard = <
     TServiceMap,
     TResolvedTypesMeta
   >,
-  name: GuardKey<typeof machine>,
+  name: ActionKey<typeof machine>,
 ) => {
-  type Guard = Action<TContext, TEvents, boolean>;
-  const guard = machine.options.guards?.[name] as Guard;
+  const action = machine.options.actions?.[name] as any;
+  const assign = action?.assignment as Action<TContext, TEvents, TContext>;
 
-  const createAcceptance = (...tests: OptionalTester<Guard>[]) => {
+  const createAcceptance = () => {
     const fn = () => {
-      const check = guard !== undefined;
+      const definedCheck = action !== undefined && action !== null;
+      const typeCheck = action?.type === 'xstate.assign';
+      const assignCheck = assign !== undefined && assign !== null;
+      const check = definedCheck && typeCheck && assignCheck;
       _expect(check, true, () => `${name} is not accepted`);
-      tests.forEach(test => test(guard));
     };
     return fn;
   };
 
   const createExpect = (
-    helper: TestHelper<TContext, TEvents, boolean>,
+    helper: TestHelper<TContext, TEvents, TContext>,
   ) => {
     const fn = () => {
       const checkAll = isTestHelperDefined(helper);
       if (!checkAll) return;
 
       const { context, event, expected } = helper;
-      const actual = guard(context, event);
+      const actual = assign(context, event);
       _expect(actual, expected);
     };
+
     return fn;
   };
 
-  return {
-    createAcceptance,
-    createExpect,
-    guard,
-  } as const;
+  return { createAcceptance, createExpect, assign } as const;
 };

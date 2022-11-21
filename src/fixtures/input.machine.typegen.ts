@@ -9,7 +9,9 @@ export interface Typegen0 {
     };
     'xstate.init': { type: 'xstate.init' };
   };
-  invokeSrcNameMap: {};
+  invokeSrcNameMap: {
+    fetch: 'done.invoke.(machine).done:invocation[0]';
+  };
   missingImplementations: {
     actions: never;
     services: never;
@@ -22,7 +24,9 @@ export interface Typegen0 {
     sendParentInput: 'INPUT';
     startQuery: '';
   };
-  eventsCausingServices: {};
+  eventsCausingServices: {
+    fetch: 'xstate.after(THROTTLE_TIME)#(machine).idle';
+  };
   eventsCausingGuards: {
     isEditing: 'xstate.after(THROTTLE_TIME)#(machine).idle';
   };

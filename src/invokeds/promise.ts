@@ -5,23 +5,18 @@ import type {
   ResolveTypegenMeta,
   ServiceMap,
   StateMachine,
-  StateValue,
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import type {
-  Action,
-  GuardKey,
-  OptionalTester,
-  TestHelper,
-} from './types';
-import { isTestHelperDefined, _expect } from './utils';
+import { Action, ServiceKey, TestHelper } from '../types';
+import { isTestHelperDefined, _expect } from '../utils';
+import { OptionalTester } from './../types';
 
-export const testGuard = <
+export const testPromise = <
   TContext extends object,
   TEvents extends EventObject = EventObject,
   TTypestate extends Typestate<TContext> = {
-    value: StateValue;
+    value: any;
     context: TContext;
   },
   TAction extends BaseActionObject = BaseActionObject,
@@ -42,29 +37,33 @@ export const testGuard = <
     TServiceMap,
     TResolvedTypesMeta
   >,
-  name: GuardKey<typeof machine>,
+  name: ServiceKey<typeof machine>,
 ) => {
-  type Guard = Action<TContext, TEvents, boolean>;
-  const guard = machine.options.guards?.[name] as Guard;
+  const service = machine.options.services?.[name];
+  type PR = Promise<TServiceMap[typeof name]['data']>;
+  type Out = Action<TContext, TEvents, PR>;
+  const promise = service as Out;
 
-  const createAcceptance = (...tests: OptionalTester<Guard>[]) => {
+  const createAcceptance = (...tests: OptionalTester<Out>[]) => {
     const fn = () => {
-      const check = guard !== undefined;
+      const check = service !== undefined;
       _expect(check, true, () => `${name} is not accepted`);
-      tests.forEach(test => test(guard));
+
+      tests.forEach(test => test(promise));
     };
     return fn;
   };
 
   const createExpect = (
-    helper: TestHelper<TContext, TEvents, boolean>,
+    helper: TestHelper<TContext, TEvents, Awaited<PR>>,
   ) => {
-    const fn = () => {
+    const fn = async () => {
       const checkAll = isTestHelperDefined(helper);
       if (!checkAll) return;
 
       const { context, event, expected } = helper;
-      const actual = guard(context, event);
+
+      const actual = await promise(context, event);
       _expect(actual, expected);
     };
     return fn;
@@ -73,6 +72,6 @@ export const testGuard = <
   return {
     createAcceptance,
     createExpect,
-    guard,
+    promise,
   } as const;
 };
