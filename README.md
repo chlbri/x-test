@@ -9,4 +9,6 @@ Better TDD
 <br/>
 <br/>
 
+### **NB** : Don not use v0.0.2
+
 _Enjoy your [library](https://github.com/chlbri/x-test)_ ✌🏾😎 _!_
