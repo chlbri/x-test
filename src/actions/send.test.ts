@@ -4,39 +4,27 @@ import { testSend } from './send';
 
 describe('Acceptance', () => {
   test.concurrent.fails('Function not exists', () => {
-    const { createAcceptance } = testSend(
-      inputMachine,
-      'notExists' as any,
-    );
-    const acceptance = createAcceptance();
+    const [acceptance] = testSend(inputMachine, 'notExists' as any);
     acceptance();
   });
 
   test.concurrent('Context in function Helper is undefined', () => {
-    const { createExpect } = testSend(inputMachine, 'startQuery');
-    createExpect({ expected: { type: 'any' } })();
+    const [, expect] = testSend(inputMachine, 'startQuery');
+    () => expect({ expected: { type: 'any' } });
   });
 });
 
 describe('Workflows', () => {
-  const { createExpect: expectObject } = testSend(
-    inputMachine,
-    'startQuery',
-  );
-  const { createExpect: expectFunction } = testSend(
-    inputMachine,
-    'sendParentInput',
-  );
-  test.concurrent(
-    'Object',
+  const [, expectObject] = testSend(inputMachine, 'startQuery');
+  const [, expectFunction] = testSend(inputMachine, 'sendParentInput');
+  test.concurrent('Object', () =>
     expectObject({
       expected: { type: 'START_QUERY' },
       context: { name: 'any' },
     }),
   );
 
-  test.concurrent(
-    'Function',
+  test.concurrent('Function - 1', () =>
     expectFunction({
       expected: { type: 'CHILD/(machine)/INPUT', input: undefined },
       context: { name: '(machine)' },
@@ -44,8 +32,7 @@ describe('Workflows', () => {
     }),
   );
 
-  test.concurrent.fails(
-    'Function - 2',
+  test.concurrent.fails('Function - 2', () =>
     expectFunction({
       expected: { type: 'CHILD/(machine)/INPUT', input: 'nothing' },
       context: { name: '(machine)' },
