@@ -18,7 +18,8 @@ import {
   trueGuard,
 } from './utils';
 
-export function mockMachine<
+function buildMockConfig<
+  // #region Types
   TContext extends object,
   TEvents extends EventObject = EventObject,
   TTypestate extends Typestate<TContext> = {
@@ -33,6 +34,50 @@ export function mockMachine<
     TAction,
     TServiceMap
   >,
+  // #endregion
+>(
+  // #region @param machine
+  machine: StateMachine<
+    TContext,
+    any,
+    TEvents,
+    TTypestate,
+    TAction,
+    TServiceMap,
+    TResolvedTypesMeta
+  >,
+  // #endregion
+) {
+  const guards = fillObject(machine.options.guards, trueGuard);
+  const actions = fillObject(machine.options.actions, emptyAction);
+  const delays = fillObject(machine.options.delays, EMPTY_DELAY);
+  const services = fillObject(machine.options.services, emptyService);
+
+  return {
+    actions,
+    guards,
+    delays,
+    services,
+  };
+}
+
+export function mockMachine<
+  // #region Types
+  TContext extends object,
+  TEvents extends EventObject = EventObject,
+  TTypestate extends Typestate<TContext> = {
+    value: any;
+    context: TContext;
+  },
+  TAction extends BaseActionObject = BaseActionObject,
+  TServiceMap extends ServiceMap = ServiceMap,
+  TResolvedTypesMeta = ResolveTypegenMeta<
+    TypegenDisabled,
+    NoInfer<TEvents>,
+    TAction,
+    TServiceMap
+  >,
+  // #endregion
 >(
   machine: StateMachine<
     TContext,
@@ -48,12 +93,10 @@ export function mockMachine<
     context?: TContext;
   },
 ) {
-  const _options: any = merge(config?.options ?? {}, {
-    guards: fillObject(machine.options.guards, trueGuard),
-    actions: fillObject(machine.options.actions, emptyAction),
-    delays: fillObject(machine.options.delays, EMPTY_DELAY),
-    services: fillObject(machine.options.services, emptyService),
-  });
+  const _options: any = merge(
+    config?.options ?? {},
+    buildMockConfig(machine),
+  );
   const _machine = machine.withConfig(_options, config?.context);
 
   // #region type Return
@@ -70,8 +113,8 @@ export function mockMachine<
       TAction,
       TServiceMap
     >
-    // #endregion
   >;
+  // #endregion
 
   return _machine as unknown as Return;
 }

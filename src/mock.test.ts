@@ -10,11 +10,11 @@ import {
 } from './utils';
 
 describe('Accpetance', () => {
-  test('Function is defined', () => {
+  test.concurrent('Function is defined', () => {
     expect(mockMachine).toBeDefined();
   });
 
-  test('Always return machine', () => {
+  test.concurrent('Always return machine', () => {
     const fn = vi.fn(mockMachine);
     fn(inputMachine as AnyStateMachine);
     expect(fn).toHaveReturnedWith(expect.any(StateNode));
@@ -39,19 +39,19 @@ describe('Workflow', () => {
     expect(functions).toContainEqual(contains);
   };
 
-  test('All Guards return true by default', () => {
+  test.concurrent('All Guards return true by default', () => {
     useTest('guards', trueGuard);
   });
 
-  test('All Action are empty by default', () => {
+  test.concurrent('All Action are empty by default', () => {
     useTest('actions', emptyAction);
   });
 
-  test(`All delays are "${EMPTY_DELAY}" by default`, () => {
+  test.concurrent(`All delays are "${EMPTY_DELAY}" by default`, () => {
     useTest('delays', EMPTY_DELAY);
   });
 
-  test('All services are empty by default', () => {
+  test.concurrent('All services are empty by default', () => {
     useTest('services', emptyService);
   });
 });
