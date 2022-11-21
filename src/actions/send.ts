@@ -8,8 +8,8 @@ import type {
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import type { Action, ActionKey, TestHelper } from './types';
-import { isTestHelperDefined, _expect } from './utils';
+import type { Action, ActionKey, TestHelper } from '../types';
+import { isTestHelperDefined, _expect } from '../utils';
 
 export const testSend = <
   TContext extends object,
@@ -36,7 +36,7 @@ export const testSend = <
     TServiceMap,
     TResolvedTypesMeta
   >,
-  name: ActionKey<TContext, TEvents, TResolvedTypesMeta>,
+  name: ActionKey<typeof machine>,
 ) => {
   const action = machine.options.actions?.[name] as any;
   // if (!action) throw 'Action not exists';
@@ -49,14 +49,10 @@ export const testSend = <
     const typeCheck = action?.type === 'xstate.send';
     const sendCheck = send !== undefined && send !== null;
     const check = definedCheck && typeCheck && sendCheck;
-    if (!check) {
-      const json = JSON.stringify(action, null, 2);
-      const error = new Error(`${json} is not accepted`);
-      throw error;
-    }
+    _expect(check, true, () => `${name} is not accepted`);
   };
 
-  const testExpect = (helper: TestHelper<TContext, TEvents, Event>) => {
+  const expect = (helper: TestHelper<TContext, TEvents, Event>) => {
     const checkAll = isTestHelperDefined(helper);
     if (!checkAll) return;
 
@@ -70,5 +66,5 @@ export const testSend = <
     }
   };
 
-  return [acceptance, testExpect] as const;
+  return { acceptance, expect, send } as const;
 };

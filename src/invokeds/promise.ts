@@ -5,18 +5,17 @@ import type {
   ResolveTypegenMeta,
   ServiceMap,
   StateMachine,
-  StateValue,
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import type { Action, GuardKey, TestHelper } from './types';
-import { isTestHelperDefined, _expect } from './utils';
+import { Action, ServiceKey, TestHelper } from '../types';
+import { isTestHelperDefined, _expect } from '../utils';
 
-export const testGuard = <
+export const testPromise = <
   TContext extends object,
   TEvents extends EventObject = EventObject,
   TTypestate extends Typestate<TContext> = {
-    value: StateValue;
+    value: any;
     context: TContext;
   },
   TAction extends BaseActionObject = BaseActionObject,
@@ -37,29 +36,31 @@ export const testGuard = <
     TServiceMap,
     TResolvedTypesMeta
   >,
-  name: GuardKey<typeof machine>,
+  name: ServiceKey<typeof machine>,
 ) => {
-  const guard = machine.options.guards?.[name] as Action<
-    TContext,
-    TEvents,
-    boolean
-  >;
+  const service = machine.options.services?.[name];
+  type PR = Promise<TServiceMap[typeof name]['data']>;
+  const promise = service as Action<TContext, TEvents, PR>;
 
-  const acceptance = () => {
-    const definedCheck = guard !== undefined && guard !== null;
-    const typeCheck = typeof guard === 'function';
+  const acceptance = (...tests: ((serv: typeof service) => void)[]) => {
+    const definedCheck = service !== undefined && service !== null;
+    const typeCheck = typeof service === 'function';
     const check = definedCheck && typeCheck;
     _expect(check, true, () => `${name} is not accepted`);
+    tests.forEach(test => test(service));
   };
 
-  const expect = (helper: TestHelper<TContext, TEvents, boolean>) => {
+  const expect = async (
+    helper: TestHelper<TContext, TEvents, Awaited<PR>>,
+  ) => {
     const checkAll = isTestHelperDefined(helper);
     if (!checkAll) return;
 
     const { context, event, expected } = helper;
-    const actual = guard(context, event);
+
+    const actual = await promise(context, event);
     _expect(actual, expected);
   };
 
-  return { acceptance, expect, guard } as const;
+  return { acceptance, expect, promise } as const;
 };

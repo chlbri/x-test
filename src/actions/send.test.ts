@@ -1,27 +1,30 @@
 import { describe, test } from 'vitest';
-import { inputMachine } from './fixtures/input.machine';
+import { inputMachine } from '../fixtures/input.machine';
 import { testSend } from './send';
 
 describe('Acceptance', () => {
   test.concurrent.fails('Function not exists', () => {
-    const [acceptance] = testSend(inputMachine, 'notExists' as any);
+    const { acceptance } = testSend(inputMachine, 'notExists' as any);
     acceptance();
   });
 
   test.concurrent('Acceptance', () => {
-    const [acceptance] = testSend(inputMachine, 'startQuery');
+    const { acceptance } = testSend(inputMachine, 'startQuery');
     acceptance();
   });
 
   test.concurrent('Context in function Helper is undefined', () => {
-    const [, expect] = testSend(inputMachine, 'startQuery');
+    const { expect } = testSend(inputMachine, 'startQuery');
     expect({ expected: { type: 'any' } });
   });
 });
 
 describe('Workflows', () => {
-  const [, expectObject] = testSend(inputMachine, 'startQuery');
-  const [, expectFunction] = testSend(inputMachine, 'sendParentInput');
+  const { expect: expectObject } = testSend(inputMachine, 'startQuery');
+  const { expect: expectFunction } = testSend(
+    inputMachine,
+    'sendParentInput',
+  );
   test.concurrent('Object', () => {
     expectObject({
       expected: { type: 'START_QUERY' },

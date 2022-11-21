@@ -44,6 +44,8 @@
     "prepublishOnly": "pnpm run build && pnpm run lint"
   },
   "devDependencies": {
+    "@types/deepmerge": "^2.2.0",
+    "@types/lodash": "^4.14.189",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
     "@vitejs/plugin-react": "^2.2.0",
@@ -59,6 +61,7 @@
     "rollup-plugin-dts": "^5.0.0",
     "rollup-plugin-esbuild": "^5.0.0",
     "rollup-plugin-terser": "^7.0.2",
+    "tslib": "^2.4.1",
     "typescript": "^4.9.3",
     "vite": "^3.2.4",
     "vite-tsconfig-paths": "^3.5.2",
@@ -67,7 +70,9 @@
   },
   "dependencies": {
     "@bemedev/x-matches": "^0.0.3",
-    "dequal": "^2.0.3"
+    "deepmerge": "^4.2.2",
+    "dequal": "^2.0.3",
+    "lodash-deepmerge": "^1.0.0"
   },
   "peerDependencies": {
     "xstate": "^4.30.6"

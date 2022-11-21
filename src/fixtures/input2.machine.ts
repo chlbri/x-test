@@ -5,6 +5,7 @@ import {
   sendParent,
   __ResolvedTypesMetaFrom,
 } from 'xstate';
+import { testPromise } from '../invokeds/promise';
 import { THROTTLE_TIME } from './constants';
 
 export type Context = {
@@ -15,11 +16,11 @@ export type Context = {
 
 export type Events = { type: 'INPUT'; input?: string };
 
-export const inputMachine = createMachine(
+export const inputMachine2 = createMachine(
   {
     predictableActionArguments: true,
     preserveActionOrder: true,
-    tsTypes: {} as import('./input.machine.typegen').Typegen0,
+    tsTypes: {} as import('./input2.machine.typegen').Typegen0,
     schema: {
       context: {} as Context,
       events: {} as Events,
@@ -82,17 +83,20 @@ export const inputMachine = createMachine(
     },
 
     delays: { THROTTLE_TIME },
-
     services: {
       fetch: async () => 3,
     },
   },
 );
 
-type Mach = typeof inputMachine;
-type TResolvedTypesMeta = __ResolvedTypesMetaFrom<Mach>;
+type Mach = typeof inputMachine2;
+type TResolvedTypesMeta =
+  keyof __ResolvedTypesMetaFrom<Mach>['resolved']['invokeSrcNameMap'];
 export type Options = Exclude<
   InternalMachineOptions<Context, Events, TResolvedTypesMeta, true>,
   undefined
 >;
+// type Serv = Resolved
+const { expect } = testPromise(inputMachine2, 'fetch');
+await expect({ expected: 2 });
 // const test2 :T = {}

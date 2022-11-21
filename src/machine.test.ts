@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { advanceByTime } from './fixtures/advanceByTime';
 import { THROTTLE_TIME } from './fixtures/constants';
 import { inputMachine } from './fixtures/input.machine';
-import testMachine from './index';
+import testMachine from './machine';
 
 const emptyFn = () => vi.fn(() => void {});
 
@@ -40,18 +40,18 @@ afterAll(() => {
 
 describe('Acceptance', () => {
   test.concurrent('Assign', () => {
-    const [acceptance] = assignAction('input');
+    const { acceptance } = assignAction('input');
     acceptance();
   });
 
   test.concurrent('Guards', () => {
-    const [acceptance] = guard('isEditing');
+    const { acceptance } = guard('isEditing');
     acceptance();
   });
 
   test.concurrent('Sending to parent', () => {
     const { sendAction } = testMachine(inputMachine);
-    const [acceptance] = sendAction('sendParentInput');
+    const { acceptance } = sendAction('sendParentInput');
     acceptance();
   });
 });
