@@ -9,7 +9,12 @@ import type {
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import type { Action, GuardKey, TestHelper } from './types';
+import type {
+  Action,
+  GuardKey,
+  OptionalTester,
+  TestHelper,
+} from './types';
 import { isTestHelperDefined, _expect } from './utils';
 
 export const testGuard = <
@@ -39,27 +44,35 @@ export const testGuard = <
   >,
   name: GuardKey<typeof machine>,
 ) => {
-  const guard = machine.options.guards?.[name] as Action<
-    TContext,
-    TEvents,
-    boolean
-  >;
+  type Guard = Action<TContext, TEvents, boolean>;
+  const guard = machine.options.guards?.[name] as Guard;
 
-  const acceptance = () => {
-    const definedCheck = guard !== undefined && guard !== null;
-    const typeCheck = typeof guard === 'function';
-    const check = definedCheck && typeCheck;
-    _expect(check, true, () => `${name} is not accepted`);
+  const createAcceptance = (...tests: OptionalTester<Guard>[]) => {
+    const fn = () => {
+      const check = guard !== undefined;
+      _expect(check, true, () => `${name} is not accepted`);
+      tests.forEach(test => test(guard));
+    };
+    return fn;
   };
 
-  const expect = (helper: TestHelper<TContext, TEvents, boolean>) => {
-    const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return;
+  const createExpect = (
+    helper: TestHelper<TContext, TEvents, boolean>,
+  ) => {
+    const fn = () => {
+      const checkAll = isTestHelperDefined(helper);
+      if (!checkAll) return;
 
-    const { context, event, expected } = helper;
-    const actual = guard(context, event);
-    _expect(actual, expected);
+      const { context, event, expected } = helper;
+      const actual = guard(context, event);
+      _expect(actual, expected);
+    };
+    return fn;
   };
 
-  return { acceptance, expect, guard } as const;
+  return {
+    createAcceptance,
+    createExpect,
+    guard,
+  } as const;
 };

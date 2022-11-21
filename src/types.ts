@@ -1,9 +1,13 @@
+import { MatchOptions, StateMatching } from '@bemedev/x-matches';
 import type {
   AnyStateMachine,
   EventObject,
   InternalMachineOptions,
   MachineOptionsFrom,
+  Prop,
   ResolveTypegenMeta,
+  StateValue,
+  TypegenEnabled,
 } from 'xstate';
 
 export type LengthOf<T> = T extends ReadonlyArray<unknown>
@@ -59,13 +63,27 @@ export type ExcludeOptionsKey<T> = Exclude<
 >;
 
 export type ServiceKey<T extends AnyStateMachine> = ExcludeOptionsKey<
-  MachineOptionsFrom<T>['services']
+  MachineOptionsFrom<T, true>['services']
 >;
 
 export type ActionKey<T extends AnyStateMachine> = ExcludeOptionsKey<
-  MachineOptionsFrom<T>['actions']
+  MachineOptionsFrom<T, true>['actions']
 >;
 
 export type GuardKey<T extends AnyStateMachine> = ExcludeOptionsKey<
-  MachineOptionsFrom<T>['guards']
+  MachineOptionsFrom<T, true>['guards']
 >;
+
+export type OptionalTester<T> = (toTest: T) => void | Promise<void>;
+
+type TSV<TResolvedTypesMeta> = TResolvedTypesMeta extends TypegenEnabled
+  ? Prop<Prop<TResolvedTypesMeta, 'resolved'>, 'matchesStates'>
+  : never;
+
+export type MatchesProps<TResolvedTypesMeta> = MatchOptions<
+  StateMatching<
+    TSV<TResolvedTypesMeta> extends StateValue
+      ? TSV<TResolvedTypesMeta>
+      : StateValue
+  >
+>[];

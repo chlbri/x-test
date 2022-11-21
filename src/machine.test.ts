@@ -28,6 +28,7 @@ const {
   send,
   assignAction,
   guard,
+  promise,
 } = testMachine(machine);
 
 beforeAll(() => {
@@ -40,18 +41,24 @@ afterAll(() => {
 
 describe('Acceptance', () => {
   test.concurrent('Assign', () => {
-    const { acceptance } = assignAction('input');
+    const { createAcceptance } = assignAction('input');
+    const acceptance = createAcceptance();
     acceptance();
   });
 
   test.concurrent('Guards', () => {
-    const { acceptance } = guard('isEditing');
-    acceptance();
+    const { createAcceptance } = guard('isEditing');
+    createAcceptance()();
   });
 
-  test.concurrent('Sending to parent', () => {
+  test.concurrent('Promises', () => {
+    const { createAcceptance } = promise('fetch');
+    createAcceptance()();
+  });
+
+  test.concurrent('Send action', () => {
     const { sendAction } = testMachine(inputMachine);
-    const { acceptance } = sendAction('sendParentInput');
+    const { createAcceptance: acceptance } = sendAction('sendParentInput');
     acceptance();
   });
 });

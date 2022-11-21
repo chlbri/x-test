@@ -51,6 +51,12 @@ const bundles = (...values) => {
   return out;
 };
 
-const config = bundles('assign', 'guard', 'index', 'send');
+const config = bundles(
+  'actions/assign',
+  'guard',
+  'index',
+  'actions/send',
+  'invokeds/promise',
+);
 
 export default config;

@@ -1,7 +1,4 @@
-import buildMatches, {
-  MatchOptions,
-  StateMatching,
-} from '@bemedev/x-matches';
+import buildMatches from '@bemedev/x-matches';
 import {
   BaseActionObject,
   EventObject,
@@ -11,7 +8,6 @@ import {
   ResolveTypegenMeta,
   ServiceMap,
   StateMachine,
-  StateValue,
   TypegenDisabled,
   TypegenEnabled,
   Typestate,
@@ -19,7 +15,15 @@ import {
 import { testAssign } from './actions/assign';
 import { testSend } from './actions/send';
 import { testGuard } from './guard';
-import type { ActionKey, GuardKey, LengthOf, TuplifyUnion } from './types';
+import { testPromise } from './invokeds';
+import type {
+  ActionKey,
+  GuardKey,
+  LengthOf,
+  MatchesProps,
+  ServiceKey,
+  TuplifyUnion,
+} from './types';
 import { reFunction, _expect } from './utils';
 
 export default function testMachine<
@@ -79,18 +83,10 @@ export default function testMachine<
   };
 
   // #region Matches
-  // #region Types
-  type TSV = TResolvedTypesMeta extends TypegenEnabled
-    ? Prop<Prop<TResolvedTypesMeta, 'resolved'>, 'matchesStates'>
-    : never;
-
-  type MatchesProps = MatchOptions<
-    StateMatching<TSV extends StateValue ? TSV : StateValue>
-  >[];
-  // #endregion
+  type _MatchesProps = MatchesProps<TResolvedTypesMeta>;
   const _matches = buildMatches(service.getSnapshot().value);
 
-  const matches = (...nodes: MatchesProps) => {
+  const matches = (...nodes: _MatchesProps) => {
     const actual = _matches(...nodes);
     _expect(actual, true);
   };
@@ -111,44 +107,14 @@ export default function testMachine<
   // #region Hooks
   type _ActionKey = ActionKey<typeof machine>;
   type _GuardKey = GuardKey<typeof machine>;
+  type _ServiceKey = ServiceKey<typeof machine>;
 
-  /**
-   * Test a sendParent action from the machine
-   * @param sender id of the action
-   * @returns A tuple of 2 :
-   *
-   *
-   * => A function to run directly inside your test to determine if the action is defined
-   *
-   * => A function test the sender
-   */
   const sendAction = (sender: _ActionKey) => {
     return testSend(machine, sender);
   };
-
-  /**
-   * Test a assign action from the machine
-   * @param action id of the action
-   * @returns A tuple of 2 :
-   *
-   *
-   * => A function to run directly inside your test to determine if the action is defined
-   *
-   * => A function test the assigner
-   */
   const assignAction = (action: _ActionKey) => testAssign(machine, action);
-
-  /**
-   * Test a guard from the machine
-   * @param guard id of the guard
-   * @returns A tuple of 2 :
-   *
-   *
-   * => A function to run directly inside your test to determine if the guard is defined
-   *
-   * => A function test the guard
-   */
   const guard = (guard: _GuardKey) => testGuard(machine, guard);
+  const promise = (promise: _ServiceKey) => testPromise(machine, promise);
   // #endregion
 
   return {
@@ -162,5 +128,6 @@ export default function testMachine<
     sendAction,
     assignAction,
     guard,
+    promise,
   };
 }

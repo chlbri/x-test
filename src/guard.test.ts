@@ -3,16 +3,21 @@ import { inputMachine } from './fixtures/input.machine';
 import { testGuard } from './guard';
 
 test.concurrent.fails('Function not exists', () => {
-  const { acceptance } = testGuard(inputMachine, 'notExists' as any);
-  acceptance();
+  const { createAcceptance } = testGuard(inputMachine, 'notExists' as any);
+  createAcceptance()();
 });
 
-test.concurrent('Context in function Helper is undefined', () => {
-  const { expect } = testGuard(inputMachine, 'isEditing');
-  expect({ expected: true });
-});
+const { createExpect } = testGuard(inputMachine, 'isEditing');
 
-test.concurrent('Workflow', () => {
-  const { expect } = testGuard(inputMachine, 'isEditing');
-  expect({ expected: true, context: { name: 'any', editing: true } });
-});
+test.concurrent(
+  'Context in function Helper is undefined',
+  createExpect({ expected: true }),
+);
+
+test.concurrent(
+  'Workflow',
+  createExpect({
+    expected: true,
+    context: { name: 'any', editing: true },
+  }),
+);

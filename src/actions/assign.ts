@@ -41,22 +41,31 @@ export const testAssign = <
   const action = machine.options.actions?.[name] as any;
   const assign = action?.assignment as Action<TContext, TEvents, TContext>;
 
-  const acceptance = () => {
-    const definedCheck = action !== undefined && action !== null;
-    const typeCheck = action?.type === 'xstate.assign';
-    const assignCheck = assign !== undefined && assign !== null;
-    const check = definedCheck && typeCheck && assignCheck;
-    _expect(check, true, () => `${name} is not accepted`);
+  const createAcceptance = () => {
+    const fn = () => {
+      const definedCheck = action !== undefined && action !== null;
+      const typeCheck = action?.type === 'xstate.assign';
+      const assignCheck = assign !== undefined && assign !== null;
+      const check = definedCheck && typeCheck && assignCheck;
+      _expect(check, true, () => `${name} is not accepted`);
+    };
+    return fn;
   };
 
-  const expect = (helper: TestHelper<TContext, TEvents, TContext>) => {
-    const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return;
+  const createExpect = (
+    helper: TestHelper<TContext, TEvents, TContext>,
+  ) => {
+    const fn = () => {
+      const checkAll = isTestHelperDefined(helper);
+      if (!checkAll) return;
 
-    const { context, event, expected } = helper;
-    const actual = assign(context, event);
-    _expect(actual, expected);
+      const { context, event, expected } = helper;
+      const actual = assign(context, event);
+      _expect(actual, expected);
+    };
+
+    return fn;
   };
 
-  return { acceptance, expect, assign } as const;
+  return { createAcceptance, createExpect, assign } as const;
 };

@@ -10,6 +10,7 @@ import type {
 } from 'xstate';
 import { Action, ServiceKey, TestHelper } from '../types';
 import { isTestHelperDefined, _expect } from '../utils';
+import { OptionalTester } from './../types';
 
 export const testPromise = <
   TContext extends object,
@@ -40,27 +41,37 @@ export const testPromise = <
 ) => {
   const service = machine.options.services?.[name];
   type PR = Promise<TServiceMap[typeof name]['data']>;
-  const promise = service as Action<TContext, TEvents, PR>;
+  type Out = Action<TContext, TEvents, PR>;
+  const promise = service as Out;
 
-  const acceptance = (...tests: ((serv: typeof service) => void)[]) => {
-    const definedCheck = service !== undefined && service !== null;
-    const typeCheck = typeof service === 'function';
-    const check = definedCheck && typeCheck;
-    _expect(check, true, () => `${name} is not accepted`);
-    tests.forEach(test => test(service));
+  const createAcceptance = (...tests: OptionalTester<Out>[]) => {
+    const fn = () => {
+      const check = service !== undefined;
+      _expect(check, true, () => `${name} is not accepted`);
+
+      tests.forEach(test => test(promise));
+    };
+    return fn;
   };
 
-  const expect = async (
+  const createExpect = (
     helper: TestHelper<TContext, TEvents, Awaited<PR>>,
   ) => {
-    const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return;
+    const fn = async () => {
+      const checkAll = isTestHelperDefined(helper);
+      if (!checkAll) return;
 
-    const { context, event, expected } = helper;
+      const { context, event, expected } = helper;
 
-    const actual = await promise(context, event);
-    _expect(actual, expected);
+      const actual = await promise(context, event);
+      _expect(actual, expected);
+    };
+    return fn;
   };
 
-  return { acceptance, expect, promise } as const;
+  return {
+    createAcceptance,
+    createExpect,
+    promise,
+  } as const;
 };

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { dequal } from 'dequal';
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, expectTypeOf, test, vi } from 'vitest';
 import { AnyStateMachine, StateNode } from 'xstate';
 import { inputMachine } from './fixtures/input.machine';
 import { mockMachine } from './mock';
@@ -20,18 +20,18 @@ describe('Acceptance', () => {
     const fn = vi.fn(mockMachine);
     fn(inputMachine as AnyStateMachine);
     expect(fn).toHaveReturnedWith(expect.any(StateNode));
+    expectTypeOf<AnyStateMachine>(mockMachine(inputMachine));
   });
 });
 
-type Keys = Exclude<
-  keyof Exclude<
-    Exclude<Parameters<typeof mockMachine>[1], undefined>['options'],
-    undefined
-  >,
-  'activities'
->;
-
 describe('Workflow', () => {
+  type Keys = Exclude<
+    keyof Exclude<
+      Exclude<Parameters<typeof mockMachine>[1], undefined>['options'],
+      undefined
+    >,
+    'activities'
+  >;
   const machine = mockMachine(inputMachine);
   const useTest = (key: Keys, contains: any) => {
     const options = machine.options[key];
