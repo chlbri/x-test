@@ -74,6 +74,10 @@ export type GuardKey<T extends AnyStateMachine> = ExcludeOptionsKey<
   MachineOptionsFrom<T, true>['guards']
 >;
 
+export type DelayKey<T extends AnyStateMachine> = ExcludeOptionsKey<
+  MachineOptionsFrom<T, true>['delays']
+>;
+
 export type OptionalTester<T> = (toTest: T) => void | Promise<void>;
 
 type TSV<TResolvedTypesMeta> = TResolvedTypesMeta extends TypegenEnabled
@@ -87,3 +91,8 @@ export type MatchesProps<TResolvedTypesMeta> = MatchOptions<
       : StateValue
   >
 >[];
+
+export type MachineActionsFrom<T extends AnyStateMachine> = Exclude<
+  MachineOptionsFrom<T, true>['actions'],
+  undefined
+>[string];

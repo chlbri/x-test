@@ -8,11 +8,15 @@ const emptyFn = () => vi.fn(() => void {});
 
 const startQuery = emptyFn();
 const sendParentInput = emptyFn();
+const escalateError = emptyFn();
+const forwardToAny = emptyFn();
 const machine = inputMachine.withConfig(
   {
     actions: {
       startQuery,
       sendParentInput,
+      escalateError,
+      forwardToAny,
     },
   },
   { name: 'test' },
@@ -26,7 +30,9 @@ const {
   stop,
   sender,
   send,
-  assignAction,
+  action,
+  assign,
+  delay,
   guard,
   promise,
 } = testMachine(machine);
@@ -41,7 +47,18 @@ afterAll(() => {
 
 describe('Acceptance', () => {
   test.concurrent('Assign', () => {
-    const [acceptance] = assignAction('input');
+    const [acceptance] = assign('input');
+    acceptance();
+  });
+
+  test.concurrent('Action', () => {
+    const [acceptance] = action({ action: 'input' });
+    acceptance();
+  });
+
+  test.concurrent('Escalate', () => {
+    const { escalate } = testMachine(inputMachine);
+    const [acceptance] = escalate('escalateError');
     acceptance();
   });
 
@@ -58,6 +75,11 @@ describe('Acceptance', () => {
   test.concurrent('Send action', () => {
     const { sendAction } = testMachine(inputMachine);
     const [acceptance] = sendAction('sendParentInput');
+    acceptance();
+  });
+
+  test.concurrent('Delays', () => {
+    const [acceptance] = delay('THROTTLE_TIME');
     acceptance();
   });
 });

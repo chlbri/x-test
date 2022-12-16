@@ -8,7 +8,6 @@ import type {
   ServiceMap,
   StateMachine,
   TypegenDisabled,
-  TypegenEnabled,
   Typestate,
 } from 'xstate';
 import {
@@ -109,7 +108,7 @@ export function mockMachine<
     TAction,
     TServiceMap,
     ResolveTypegenMeta<
-      TypegenEnabled,
+      TypegenDisabled,
       NoInfer<TEvents>,
       TAction,
       TServiceMap

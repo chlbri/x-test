@@ -13,10 +13,14 @@ import {
   Typestate,
 } from 'xstate';
 import { testAssign, testSend } from './actions';
+import { testEscalate } from './actions/escalate';
+import { testAction } from './actions/_default';
+import { testDelay } from './delay';
 import { testGuard } from './guard';
 import { testPromise } from './invokeds';
 import type {
   ActionKey,
+  DelayKey,
   GuardKey,
   LengthOf,
   MatchesProps,
@@ -51,6 +55,7 @@ export default function testMachine<
     TResolvedTypesMeta
   >,
 ) {
+  type Machine = typeof machine;
   // @ts-ignore Use the machine without asking to implement all options
   const service = interpret(machine);
 
@@ -73,10 +78,9 @@ export default function testMachine<
         : [Omit<Extract<TEvents, { type: T }>, 'type'>]
       : never;
 
-    // @ts-ignore Ignore for empty tuple
-    const fn = (...[event]: E) => {
+    const fn = (...data: E) => {
       // @ts-ignore Ignore for undefined event
-      service.send({ type, ...event } as any);
+      service.send({ type, ...data?.[0] } as any);
     };
     return fn;
   };
@@ -104,14 +108,27 @@ export default function testMachine<
   // #endregion
 
   // #region Hooks
-  type _ActionKey = ActionKey<typeof machine>;
-  type _GuardKey = GuardKey<typeof machine>;
-  type _ServiceKey = ServiceKey<typeof machine>;
+  type _ActionKey = ActionKey<Machine>;
+  type _GuardKey = GuardKey<Machine>;
+  type _ServiceKey = ServiceKey<Machine>;
+  type _DelayKey = DelayKey<Machine>;
 
   const sendAction = (sender: _ActionKey) => {
     return testSend(machine, sender);
   };
-  const assignAction = (action: _ActionKey) => testAssign(machine, action);
+
+  // #region Action
+  type ActionParams = Omit<
+    Parameters<typeof testAction>[0],
+    'machine' | 'action'
+  > & {
+    action: _ActionKey;
+  };
+  const action = (rest: ActionParams) => testAction({ machine, ...rest });
+  // #endregion
+  const assign = (action: _ActionKey) => testAssign(machine, action);
+  const escalate = (action: _ActionKey) => testEscalate(machine, action);
+  const delay = (delay: _DelayKey) => testDelay(machine, delay);
   const guard = (guard: _GuardKey) => testGuard(machine, guard);
   const promise = (promise: _ServiceKey) => testPromise(machine, promise);
   // #endregion
@@ -124,9 +141,12 @@ export default function testMachine<
     send: service.send,
     stop,
     hasTags,
+    action,
+    assign,
+    escalate,
     sendAction,
-    assignAction,
     guard,
     promise,
+    delay,
   };
 }

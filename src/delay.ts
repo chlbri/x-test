@@ -9,10 +9,10 @@ import type {
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import type { Action, GuardKey, TestHelper } from './types';
+import type { Action, DelayKey, TestHelper } from './types';
 import { _expect } from './utils';
 
-export const testGuard = <
+export const testDelay = <
   TContext extends object,
   TEvents extends EventObject = EventObject,
   TTypestate extends Typestate<TContext> = {
@@ -37,21 +37,28 @@ export const testGuard = <
     TServiceMap,
     TResolvedTypesMeta
   >,
-  name: GuardKey<typeof machine>,
+  name: DelayKey<typeof machine>,
 ) => {
-  type Guard = Action<TContext, TEvents, boolean>;
-  const guard = machine.options.guards?.[name] as Guard;
+  type Delay = Action<TContext, TEvents, number>;
+  const delay = machine.options.delays?.[name] as Delay | number;
 
   const acceptance = () => {
-    const check = guard !== undefined;
+    const definedCheck = delay !== undefined;
+    const typeCheck =
+      typeof delay === 'number' || typeof delay === 'function';
+    const check = definedCheck && typeCheck;
     _expect(check, true, () => `${name} is not accepted`);
   };
 
-  const expect = (helper: TestHelper<TContext, TEvents, boolean>) => {
+  const expect = (helper: TestHelper<TContext, TEvents, number>) => {
     const { context, event, expected } = helper;
-    const actual = guard(context, event);
-    _expect(actual, expected);
+    if (typeof delay === 'number') {
+      _expect(delay, expected);
+    } else {
+      const actual = delay(context, event);
+      _expect(actual, expected);
+    }
   };
 
-  return [acceptance, expect, guard] as const;
+  return [acceptance, expect, delay] as const;
 };

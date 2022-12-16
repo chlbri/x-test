@@ -59,6 +59,7 @@ const bundles = (...values) => {
 const config = bundles(
   'actions/index',
   'guard',
+  'delay',
   'index',
   'invokeds/index',
 );

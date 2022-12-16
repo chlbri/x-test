@@ -9,9 +9,9 @@ import type {
   Typestate,
 } from 'xstate';
 import type { ActionKey } from '../types';
-import { testAction } from './_default';
+import { testSend } from './send';
 
-export const testSend = <
+export const testEscalate = <
   TContext extends object,
   TEvents extends EventObject = EventObject,
   TTypestate extends Typestate<TContext> = {
@@ -37,10 +37,14 @@ export const testSend = <
     TResolvedTypesMeta
   >,
   name: ActionKey<typeof machine>,
-) =>
-  testAction({
-    machine,
-    action: name,
-    accessFunction: action => action?.event,
-    typeCheck: action => action?.type === 'xstate.send',
-  });
+) => {
+  const [acceptance, _expect, escalate] = testSend(machine, name);
+  const expect = (data: any) => {
+    _expect({
+      expected: { type: 'xstate.error', data },
+      context: {} as TContext,
+    });
+  };
+
+  return [acceptance, expect, escalate] as const;
+};
