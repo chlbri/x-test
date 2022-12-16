@@ -1,10 +1,12 @@
 import { assign } from '@xstate/immer';
 import {
   createMachine,
+  forwardTo,
   InternalMachineOptions,
   sendParent,
   __ResolvedTypesMetaFrom,
 } from 'xstate';
+import { escalate } from 'xstate/lib/actions';
 import { THROTTLE_TIME } from './constants';
 
 export type Context = {
@@ -31,7 +33,7 @@ export const inputMachine = createMachine(
     on: {
       INPUT: {
         target: '.idle',
-        actions: ['input', 'sendParentInput'],
+        actions: ['input', 'sendParentInput', 'forwardToAny', 'other'],
         internal: false,
       },
     },
@@ -50,10 +52,16 @@ export const inputMachine = createMachine(
         entry: 'resetEdititng',
         invoke: {
           src: 'fetch',
+          onError: {
+            actions: ['escalateError'],
+          },
         },
         always: {
           actions: ['startQuery'],
           target: 'idle',
+        },
+        after: {
+          CUSTOM_DELAY: {},
         },
       },
     },
@@ -75,13 +83,19 @@ export const inputMachine = createMachine(
       })),
 
       startQuery: sendParent('START_QUERY'),
+      escalateError: escalate('ERROR'),
+      forwardToAny: forwardTo('ANY'),
+      other: () => 'POTHER',
     },
 
     guards: {
       isEditing: context => !!context.editing,
     },
 
-    delays: { THROTTLE_TIME },
+    delays: {
+      THROTTLE_TIME,
+      CUSTOM_DELAY: ({ name }) => name.length,
+    },
 
     services: {
       fetch: async () => 3,

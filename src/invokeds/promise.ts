@@ -12,6 +12,12 @@ import { Action, ServiceKey, TestHelper } from '../types';
 import { isTestHelperDefined, _expect } from '../utils';
 import { OptionalTester } from './../types';
 
+/**
+ * Only works for promise, don't use with invoked machines or callbacks or subscribables or anything else
+ * @param machine The machine to Test
+ * @param name the name of the promise service
+ * @returns Some function to test this promise service
+ */
 export const testPromise = <
   TContext extends object,
   TEvents extends EventObject = EventObject,

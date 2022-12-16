@@ -7,15 +7,10 @@ test.concurrent.fails('Fails if Function not exists', () => {
   acceptance();
 });
 
-const [, expect] = testGuard(inputMachine, 'isEditing');
-
-test.concurrent('Context in function Helper is undefined', () =>
-  expect({ expected: true }),
-);
-
-test.concurrent('Workflow', () =>
+test.concurrent('Workflow', () => {
+  const [, expect] = testGuard(inputMachine, 'isEditing');
   expect({
     expected: true,
     context: { name: 'any', editing: true },
-  }),
-);
+  });
+});

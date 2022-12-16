@@ -3,8 +3,8 @@ import { inputMachine } from '../fixtures/input.machine';
 import { testSend } from './send';
 
 describe('Acceptance', () => {
-  test.concurrent.fails('Function not exists', () => {
-    const [acceptance] = testSend(inputMachine, 'notExists' as any);
+  test.concurrent('Function not exists', () => {
+    const [acceptance] = testSend(inputMachine, 'forwardToAny' as any);
     acceptance();
   });
 
@@ -15,12 +15,12 @@ describe('Acceptance', () => {
 });
 
 describe('Workflows', () => {
-  const [, expectObject] = testSend(inputMachine, 'startQuery');
+  const [, expectFunction2] = testSend(inputMachine, 'startQuery');
   const [, expectFunction] = testSend(inputMachine, 'sendParentInput');
   test.concurrent('Object', () =>
-    expectObject({
+    expectFunction2({
       expected: { type: 'START_QUERY' },
-      context: { name: 'any' },
+      context: {},
     }),
   );
 

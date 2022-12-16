@@ -8,8 +8,8 @@ import type {
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import type { Action, ActionKey, TestHelper } from '../types';
-import { isTestHelperDefined, _expect } from '../utils';
+import type { ActionKey } from '../types';
+import { testAction } from './_default';
 
 export const testAssign = <
   TContext extends object,
@@ -37,26 +37,10 @@ export const testAssign = <
     TResolvedTypesMeta
   >,
   name: ActionKey<typeof machine>,
-) => {
-  const action = machine.options.actions?.[name] as any;
-  const assign = action?.assignment as Action<TContext, TEvents, TContext>;
-
-  const acceptance = () => {
-    const definedCheck = action !== undefined && action !== null;
-    const typeCheck = action?.type === 'xstate.assign';
-    const assignCheck = assign !== undefined && assign !== null;
-    const check = definedCheck && typeCheck && assignCheck;
-    _expect(check, true, () => `${name} is not accepted`);
-  };
-
-  const expect = (helper: TestHelper<TContext, TEvents, TContext>) => {
-    const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return;
-
-    const { context, event, expected } = helper;
-    const actual = assign(context, event);
-    _expect(actual, expected);
-  };
-
-  return [acceptance, expect, assign] as const;
-};
+) =>
+  testAction({
+    machine,
+    action: name,
+    accessFunction: action => action?.assignment,
+    typeCheck: action => action?.type === 'xstate.assign',
+  });

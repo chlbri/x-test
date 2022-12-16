@@ -9,10 +9,6 @@ test.concurrent.fails('Function is not defined in the machine', () => {
 
 const [, expect] = testAssign(inputMachine, 'input');
 
-test.concurrent('Context and event are not defined', () =>
-  expect({ expected: { name: '' } }),
-);
-
 test.concurrent('#1 Workflow', () =>
   expect({
     expected: { name: 'any', input: 'input', editing: true },
