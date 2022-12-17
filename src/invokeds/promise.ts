@@ -9,7 +9,7 @@ import type {
   Typestate,
 } from 'xstate';
 import { Action, ServiceKey, TestHelper } from '../types';
-import { isTestHelperDefined, _expect } from '../utils';
+import { _expect } from '../utils';
 import { OptionalTester } from './../types';
 
 /**
@@ -60,9 +60,6 @@ export const testPromise = <
   const expect = async (
     helper: TestHelper<TContext, TEvents, Awaited<PR>>,
   ) => {
-    const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return;
-
     const { context, event, expected } = helper;
 
     const actual = await promise(context, event);

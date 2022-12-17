@@ -1,8 +1,5 @@
 import { dequal } from 'dequal';
 
-import type { EventObject } from 'xstate';
-import type { TestHelper } from './types';
-
 // #region SubType
 type FilterFlags<Base, Condition> = {
   [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
@@ -44,18 +41,18 @@ export function _expect<T>(actual: T, expected: T, error = defaultError) {
   if (!check) throw new Error(error(actual, expected));
 }
 
-export const isTestHelperDefined = <
-  TContext extends object = object,
-  TEvents extends EventObject = EventObject,
-  T = TContext,
->(
-  helper: TestHelper<TContext, TEvents, T>,
-) => {
-  const { context, event } = helper;
-  const checkAll = !context && !event;
-  if (checkAll) return false;
-  return true;
-};
+// export const isTestHelperDefined = <
+//   TContext extends object = object,
+//   TEvents extends EventObject = EventObject,
+//   T = TContext,
+// >(
+//   helper: TestHelper<TContext, TEvents, T>,
+// ) => {
+//   const { context, event } = helper;
+//   const checkAll = !context && !event;
+//   if (checkAll) return false;
+//   return true;
+// };
 
 export function defaultError(actual: any, expected: any) {
   const actualJSON = JSON.stringify(actual, null, 2);
