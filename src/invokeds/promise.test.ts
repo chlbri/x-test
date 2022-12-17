@@ -58,11 +58,6 @@ describe('Acceptance', () => {
 });
 
 describe('Workflow', () => {
-  test.concurrent(
-    '#1 Will succeed if context and event are undefineds',
-    () => expects({ expected: NOT_EXPECTED }),
-  );
-
   test.concurrent.fails(
     '#2 Will fail if context or event are defined, and expected is not right',
     () => expects({ expected: NOT_EXPECTED, context: { name: 'any' } }),
