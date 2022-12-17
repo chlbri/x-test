@@ -40,7 +40,6 @@
     "eslint": "eslint \"{src/**/*,App}.{ts,tsx}\"",
     "lint": "pnpm run prettier && pnpm run eslint --fix",
     "lint-watch": "onchange --await-write-finish 5500 \"**/*\" -- pnpm run lint",
-    "postpublish": "git fetch & git pull",
     "prepublishOnly": "pnpm run build && pnpm run lint"
   },
   "devDependencies": {
