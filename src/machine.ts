@@ -1,6 +1,7 @@
 import buildMatches from '@bemedev/x-matches';
 import {
   BaseActionObject,
+  createMachine,
   EventObject,
   interpret,
   NoInfer,
@@ -28,6 +29,7 @@ import type {
   TuplifyUnion,
 } from './types';
 import { reFunction, _expect } from './utils';
+import { transformAlwaysToAfter, transformToLocal } from './workaround';
 
 export default function testMachine<
   TContext extends object,
@@ -56,11 +58,19 @@ export default function testMachine<
   >,
 ) {
   type Machine = typeof machine;
+
+  const config = transformAlwaysToAfter(machine.config);
+  const options = transformToLocal(machine.options);
+  const _machine = createMachine(config, options).withContext(
+    machine.context,
+  ) as unknown as typeof machine;
+
   // @ts-ignore Use the machine without asking to implement all options
-  const service = interpret(machine);
+  const service = interpret(_machine);
 
   const start = reFunction(service, 'start');
   const stop = reFunction(service, 'stop');
+  const send = reFunction(service, 'send');
 
   const context = <T = TContext>(
     expected: T,
@@ -87,9 +97,10 @@ export default function testMachine<
 
   // #region Matches
   type _MatchesProps = MatchesProps<TResolvedTypesMeta>;
-  const _matches = buildMatches(service.getSnapshot().value);
 
   const matches = (...nodes: _MatchesProps) => {
+    const value = service.getSnapshot().value;
+    const _matches = buildMatches(value);
     const actual = _matches(...nodes);
     _expect(actual, true);
   };
@@ -113,10 +124,6 @@ export default function testMachine<
   type _ServiceKey = ServiceKey<Machine>;
   type _DelayKey = DelayKey<Machine>;
 
-  const sendAction = (sender: _ActionKey) => {
-    return testSend(machine, sender);
-  };
-
   // #region Action
   type ActionParams = Omit<
     Parameters<typeof testAction>[0],
@@ -126,6 +133,9 @@ export default function testMachine<
   };
   const action = (rest: ActionParams) => testAction({ machine, ...rest });
   // #endregion
+  const sendAction = (sender: _ActionKey) => {
+    return testSend(machine, sender);
+  };
   const assign = (action: _ActionKey) => testAssign(machine, action);
   const escalate = (action: _ActionKey) => testEscalate(machine, action);
   const delay = (delay: _DelayKey) => testDelay(machine, delay);
@@ -138,7 +148,7 @@ export default function testMachine<
     context,
     matches,
     start,
-    send: service.send,
+    send,
     stop,
     hasTags,
     action,

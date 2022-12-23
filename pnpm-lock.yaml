@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@bemedev/fsf': ^0.6.2
   '@bemedev/x-matches': ^0.0.3
   '@types/deepmerge': ^2.2.0
   '@typescript-eslint/eslint-plugin': ^5.43.0
@@ -34,6 +35,7 @@ dependencies:
   dequal: 2.0.3
 
 devDependencies:
+  '@bemedev/fsf': 0.6.2
   '@types/deepmerge': 2.2.0
   '@typescript-eslint/eslint-plugin': 5.43.0_nqj4bdx4ekws7aecttskpih4py
   '@typescript-eslint/parser': 5.43.0_hsf322ms6xhhd4b5ne6lb74y4a
@@ -420,6 +422,24 @@ packages:
       }
     engines: { node: '>=12' }
     dev: false
+
+  /@bemedev/fsf/0.6.2:
+    resolution:
+      {
+        integrity: sha512-SzpvsYpDBNyaEePI+1zX4UfnUZaLxDXjk9qRTg0IzICCHRMWmkdCup/nsSBLNjZowNH0eooA1q59Xr3UbHDvXw==,
+      }
+    dependencies:
+      '@bemedev/x-guard': 0.2.0
+      deepmerge: 4.2.2
+    dev: true
+
+  /@bemedev/x-guard/0.2.0:
+    resolution:
+      {
+        integrity: sha512-BrQBlnHApofNWLTqyenTtddvHMBMdKP+IA7e3XSKOcRxz3WUphnahWmWNUxlevxKzvimUs5BFbutDVme8imjDw==,
+      }
+    engines: { node: '>=12' }
+    dev: true
 
   /@bemedev/x-matches/0.0.3:
     resolution:

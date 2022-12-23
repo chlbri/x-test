@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import { ALWAYS_TIME } from './constants';
 import { advanceByTime } from './fixtures/advanceByTime';
 import { THROTTLE_TIME } from './fixtures/constants';
 import { inputMachine } from './fixtures/input.machine';
@@ -21,6 +22,8 @@ const machine = inputMachine.withConfig(
   },
   { name: 'test' },
 );
+
+machine.context; //?
 
 const {
   start,
@@ -126,6 +129,8 @@ describe('Workflows', () => {
     test('#7 State was passed by "done"', () => {
       context(false, context => context.editing);
     });
+
+    test('Wait for always', () => advanceByTime(ALWAYS_TIME));
 
     test('#8 The machine starts the query', () => {
       expect(startQuery).toBeCalledTimes(1);

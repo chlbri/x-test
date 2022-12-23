@@ -43,6 +43,7 @@
     "prepublishOnly": "pnpm run build && pnpm run lint"
   },
   "devDependencies": {
+    "@bemedev/fsf": "^0.6.2",
     "@types/deepmerge": "^2.2.0",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
