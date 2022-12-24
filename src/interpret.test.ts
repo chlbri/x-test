@@ -1,26 +1,11 @@
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import { ALWAYS_TIME } from './constants';
 import { advanceByTime } from './fixtures/advanceByTime';
 import { THROTTLE_TIME } from './fixtures/constants';
 import { inputMachine } from './fixtures/input.machine';
-import testMachine from './machine';
+import { interpret } from './interpret';
 
-const emptyFn = () => vi.fn(() => void {});
-
-const startQuery = emptyFn();
-const sendParentInput = emptyFn();
-const escalateError = emptyFn();
-const forwardToAny = emptyFn();
-const machine = inputMachine.withConfig(
-  {
-    actions: {
-      startQuery,
-      sendParentInput,
-      escalateError,
-      forwardToAny,
-    },
-  },
-  { name: 'test' },
-);
+const machine = inputMachine.withContext({ name: 'test' });
 
 const {
   start,
@@ -35,7 +20,9 @@ const {
   delay,
   guard,
   promise,
-} = testMachine(machine);
+  __status,
+  parentSend,
+} = interpret(machine);
 
 beforeAll(() => {
   vi.useFakeTimers();
@@ -56,12 +43,6 @@ describe('Acceptance', () => {
     acceptance();
   });
 
-  test.concurrent('Escalate', () => {
-    const { escalate } = testMachine(inputMachine);
-    const [acceptance] = escalate('escalateError');
-    acceptance();
-  });
-
   test.concurrent('Guards', () => {
     const [acceptance] = guard('isEditing');
     acceptance();
@@ -73,7 +54,7 @@ describe('Acceptance', () => {
   });
 
   test.concurrent('Send action', () => {
-    const { sendAction } = testMachine(inputMachine);
+    const { sendAction } = interpret(inputMachine);
     const [acceptance] = sendAction('sendParentInput');
     acceptance();
   });
@@ -92,7 +73,6 @@ describe('Workflows', () => {
     });
 
     afterAll(() => {
-      [startQuery, sendParentInput].forEach(fn => fn.mockClear());
       //Stop
       stop();
     });
@@ -118,17 +98,19 @@ describe('Workflows', () => {
     });
 
     test('#5 Input is sent to parent', () => {
-      expect(sendParentInput).toBeCalledTimes(1);
+      parentSend('sendParentInput');
     });
 
-    test('#6 WAIT THROTTLE_TIME', () => advanceByTime(THROTTLE_TIME + 5));
+    test('#6 WAIT THROTTLE_TIME', () => advanceByTime(THROTTLE_TIME));
 
     test('#7 State was passed by "done"', () => {
       context(false, context => context.editing);
     });
 
+    test('Wait for always', () => advanceByTime(ALWAYS_TIME));
+
     test('#8 The machine starts the query', () => {
-      expect(startQuery).toBeCalledTimes(1);
+      parentSend('startQuery');
     });
   });
 
@@ -144,12 +126,13 @@ describe('Workflows', () => {
     });
 
     test('#3 Nothing is inputed', () => {
+      expect(__status()).toBe(1);
       context(undefined, context => context.editing);
       context(undefined, context => context.input);
     });
 
-    test('#4 Nothing is sent', () => {
-      expect(sendParentInput).not.toBeCalled();
+    test.fails('#4 Nothing is sent', () => {
+      parentSend('sendParentInput');
     });
 
     test('#5 The state has a tag "busy"', () => {

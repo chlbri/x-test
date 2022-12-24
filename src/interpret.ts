@@ -1,8 +1,10 @@
 import buildMatches from '@bemedev/x-matches';
 import {
   BaseActionObject,
+  createMachine,
   EventObject,
-  interpret,
+  interpret as _interpret,
+  InterpreterStatus,
   NoInfer,
   Prop,
   ResolveTypegenMeta,
@@ -12,12 +14,12 @@ import {
   TypegenEnabled,
   Typestate,
 } from 'xstate';
-import { testAssign, testSend } from './actions';
-import { testEscalate } from './actions/escalate';
-import { testAction } from './actions/_default';
+
+import { testAction, testAssign, testSend } from './actions';
 import { testDelay } from './delay';
 import { testGuard } from './guard';
 import { testPromise } from './invokeds';
+
 import type {
   ActionKey,
   DelayKey,
@@ -27,9 +29,15 @@ import type {
   ServiceKey,
   TuplifyUnion,
 } from './types';
-import { reFunction, _expect } from './utils';
 
-export default function testMachine<
+import {
+  reFunction,
+  transformAlwaysToAfter,
+  transformParentEventsToLocal,
+  _expect,
+} from './utils';
+
+export function interpret<
   TContext extends object,
   TEvents extends EventObject = EventObject,
   TTypestate extends Typestate<TContext> = {
@@ -56,11 +64,34 @@ export default function testMachine<
   >,
 ) {
   type Machine = typeof machine;
-  // @ts-ignore Use the machine without asking to implement all options
-  const service = interpret(machine);
+  type _ActionKey = ActionKey<Machine>;
 
+  // #region Preparation
+  const config = transformAlwaysToAfter(machine.config);
+  const [options, parentEvents] = transformParentEventsToLocal(
+    machine.options,
+  );
+  const _machine = createMachine(config, options).withContext(
+    machine.context,
+  ) as unknown as Machine;
+
+  // @ts-ignore Use the machine without asking to implement all options
+  const service = _interpret(_machine);
+  // #endregion
+
+  // #region Functions
   const start = reFunction(service, 'start');
-  const stop = reFunction(service, 'stop');
+
+  const clear = () => {
+    parentEvents.length = 0;
+  };
+
+  const stop = () => {
+    clear();
+    if (service.status === InterpreterStatus.Running) service.stop();
+  };
+
+  const send = reFunction(service, 'send');
 
   const context = <T = TContext>(
     expected: T,
@@ -69,6 +100,11 @@ export default function testMachine<
     const innerContext = service.getSnapshot().context;
     const actual = selector ? selector(innerContext) : innerContext;
     _expect(actual, expected);
+  };
+
+  const parentSend = (send: _ActionKey) => {
+    const check = parentEvents.includes(send);
+    _expect(check, true);
   };
 
   const sender = <T extends TEvents['type']>(type: T) => {
@@ -84,12 +120,14 @@ export default function testMachine<
     };
     return fn;
   };
+  // #endregion
 
   // #region Matches
   type _MatchesProps = MatchesProps<TResolvedTypesMeta>;
-  const _matches = buildMatches(service.getSnapshot().value);
 
   const matches = (...nodes: _MatchesProps) => {
+    const value = service.getSnapshot().value;
+    const _matches = buildMatches(value);
     const actual = _matches(...nodes);
     _expect(actual, true);
   };
@@ -108,14 +146,10 @@ export default function testMachine<
   // #endregion
 
   // #region Hooks
-  type _ActionKey = ActionKey<Machine>;
+
   type _GuardKey = GuardKey<Machine>;
   type _ServiceKey = ServiceKey<Machine>;
   type _DelayKey = DelayKey<Machine>;
-
-  const sendAction = (sender: _ActionKey) => {
-    return testSend(machine, sender);
-  };
 
   // #region Action
   type ActionParams = Omit<
@@ -126,11 +160,15 @@ export default function testMachine<
   };
   const action = (rest: ActionParams) => testAction({ machine, ...rest });
   // #endregion
+  const sendAction = (sender: _ActionKey) => {
+    return testSend(machine, sender);
+  };
   const assign = (action: _ActionKey) => testAssign(machine, action);
-  const escalate = (action: _ActionKey) => testEscalate(machine, action);
+
   const delay = (delay: _DelayKey) => testDelay(machine, delay);
   const guard = (guard: _GuardKey) => testGuard(machine, guard);
   const promise = (promise: _ServiceKey) => testPromise(machine, promise);
+  const __status = () => service.status;
   // #endregion
 
   return {
@@ -138,15 +176,17 @@ export default function testMachine<
     context,
     matches,
     start,
-    send: service.send,
+    send,
     stop,
+    clear,
     hasTags,
     action,
     assign,
-    escalate,
     sendAction,
     guard,
     promise,
     delay,
+    parentSend,
+    __status,
   };
 }

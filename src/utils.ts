@@ -41,19 +41,6 @@ export function _expect<T>(actual: T, expected: T, error = defaultError) {
   if (!check) throw new Error(error(actual, expected));
 }
 
-// export const isTestHelperDefined = <
-//   TContext extends object = object,
-//   TEvents extends EventObject = EventObject,
-//   T = TContext,
-// >(
-//   helper: TestHelper<TContext, TEvents, T>,
-// ) => {
-//   const { context, event } = helper;
-//   const checkAll = !context && !event;
-//   if (checkAll) return false;
-//   return true;
-// };
-
 export function defaultError(actual: any, expected: any) {
   const actualJSON = JSON.stringify(actual, null, 2);
   const expectedJSON = JSON.stringify(expected, null, 2);
@@ -64,9 +51,7 @@ ${expectedJSON}
 `;
 }
 
-export const emptyAction = () => {
-  /* EMPTY */
-};
+export const emptyAction = () => void 0;
 export const trueGuard = () => true;
 export const falseGuard = () => false;
 
@@ -98,4 +83,58 @@ export function fillObject<T extends object, F>(object?: T, fill?: F) {
     return acc;
   }, <Reducer<T, F>>{});
   return reducer;
+}
+
+import { ALWAYS_TIME } from './constants';
+import { deepClone } from './helpers';
+
+type _State = {
+  always?: any;
+  after?: any;
+  states?: Record<string, _State>;
+} & Record<string, any>;
+
+export function transformAlwaysToAfter<T extends _State>(state: T) {
+  const inner = deepClone(state);
+  if (inner.always) {
+    inner.after = { [ALWAYS_TIME]: inner.always, ...inner.after };
+    delete inner.always;
+  }
+  const states = inner.states;
+  if (states) {
+    for (const key in states) {
+      const _state = states[key];
+      states[key] = transformAlwaysToAfter(_state);
+    }
+  }
+  inner.states = states;
+  return inner;
+}
+
+type _Options = {
+  actions?: Record<string, any>;
+} & Record<string, any>;
+
+export function transformParentEventsToLocal<T extends _Options>(
+  options: T,
+) {
+  const actions = options.actions;
+  const localActions: any = {};
+  const inner: any = {};
+  const parentEvents: string[] = [];
+  for (const key in actions) {
+    const action = actions[key];
+    if (action.to === '#_parent') {
+      localActions[key] = () => {
+        parentEvents.push(key);
+      };
+    } else {
+      localActions[key] = action;
+    }
+  }
+  inner.actions = localActions;
+  inner.guards = options.guards;
+  inner.services = options.services;
+  inner.delays = options.delays;
+  return [inner as T, parentEvents] as const;
 }

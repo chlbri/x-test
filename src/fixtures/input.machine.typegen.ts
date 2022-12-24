@@ -20,7 +20,6 @@
         };
         eventsCausingActions: {
           "escalateError": "error.platform.(machine).done:invocation[0]";
-"forwardToAny": "INPUT";
 "input": "INPUT";
 "other": "INPUT";
 "resetEdititng": "xstate.after(THROTTLE_TIME)#(machine).idle";
