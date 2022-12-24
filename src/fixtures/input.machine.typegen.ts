@@ -13,14 +13,13 @@
           "fetch": "done.invoke.(machine).done:invocation[0]";
         };
         missingImplementations: {
-          actions: "forwardToAny";
+          actions: never;
           delays: never;
           guards: never;
           services: never;
         };
         eventsCausingActions: {
           "escalateError": "error.platform.(machine).done:invocation[0]";
-"forwardToAny": "INPUT";
 "input": "INPUT";
 "other": "INPUT";
 "resetEdititng": "xstate.after(THROTTLE_TIME)#(machine).idle";

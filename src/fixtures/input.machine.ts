@@ -32,7 +32,7 @@ export const inputMachine = createMachine(
     on: {
       INPUT: {
         target: '.idle',
-        actions: ['input', 'sendParentInput', 'forwardToAny', 'other'],
+        actions: ['input', 'sendParentInput', 'other'],
         internal: false,
       },
     },
