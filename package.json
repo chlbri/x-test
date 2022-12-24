@@ -45,7 +45,7 @@
     "eslint": "eslint \"{src/**/*,App}.{ts,tsx}\"",
     "lint": "pnpm run prettier && pnpm run eslint --fix",
     "lint-watch": "onchange --await-write-finish 5500 \"**/*\" -- pnpm run lint",
-    "prepublishOnly": "pnpm run build && pnpm run lint"
+    "prepublishOnly": "pnpm run lint && pnpm run build"
   },
   "devDependencies": {
     "@bemedev/fsf": "^0.6.2",
