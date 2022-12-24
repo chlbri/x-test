@@ -1,6 +1,6 @@
 {
   "name": "@bemedev/x-test",
-  "version": "0.2.1-beta",
+  "version": "0.2.2-beta",
   "description": "Test XState Machine sequentially",
   "author": {
     "email": "bri_lvi@icloud.com",

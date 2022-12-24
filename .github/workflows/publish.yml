@@ -49,7 +49,7 @@ jobs:
         run: pnpm install
 
       - name: Publish
-        run: npm publish --access public
+        run: npm publish --access public --beta
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
