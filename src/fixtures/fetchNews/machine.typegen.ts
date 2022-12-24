@@ -39,11 +39,11 @@
 "assignResponse": "done.invoke.fetch";
 "buildURL": "QUERY";
 "constructErrors": "";
-"escaladeFetchError": "error.platform.fetch";
-"escaladeJsonError": "error.platform.json";
-"escaladeZodError": "error.platform.zod";
+"escalateFetchError": "error.platform.fetch";
+"escalateJsonError": "error.platform.json";
 "escalateNoAPI_KEY": "error.platform.fetchNews.environment.API_KEY:invocation[0]";
 "escalateNoAPI_URL": "error.platform.fetchNews.environment.API_URL:invocation[0]";
+"escalateZodError": "error.platform.zod";
         };
         eventsCausingDelays: {
           

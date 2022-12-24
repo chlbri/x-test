@@ -1,7 +1,6 @@
 import { assign } from '@xstate/immer';
 import {
   createMachine,
-  forwardTo,
   InternalMachineOptions,
   sendParent,
   __ResolvedTypesMetaFrom,
@@ -84,7 +83,6 @@ export const inputMachine = createMachine(
 
       startQuery: sendParent('START_QUERY'),
       escalateError: escalate('ERROR'),
-      forwardToAny: forwardTo('ANY'),
       other: () => 'POTHER',
     },
 

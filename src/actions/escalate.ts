@@ -39,7 +39,7 @@ export const testEscalate = <
   name: ActionKey<typeof machine>,
 ) => {
   const [acceptance, _expect, escalate] = testSend(machine, name);
-  const expect = (data: any) => {
+  const expect = (data?: any) => {
     _expect({
       expected: { type: 'xstate.error', data },
       context: {} as TContext,

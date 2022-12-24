@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, test, vi } from 'vitest';
-import { ALWAYS_TIME } from '../../constants';
-import testMachine from '../../machine';
-import { advanceByTime } from '../advanceByTime';
-import machine from './machine';
+import { ALWAYS_TIME } from './constants';
+import { advanceByTime } from './fixtures/advanceByTime';
+import machine from './fixtures/fetchNews/machine';
+import { interpret } from './interpret';
 
 function useTestConfig() {
   beforeAll(() => {
@@ -30,29 +30,10 @@ function useEnvDefined() {
   });
 }
 
-function useEnvUndefined() {
-  beforeAll(() => {
-    process.env = {};
-  });
-  afterAll(() => {
-    process.env = {
-      MEDIA_STACK_APIKEY,
-      MEDIA_STACK_API_URL,
-    };
-  });
-}
-
 useTestConfig();
 
-const { assign, promise, escalate, start, matches, stop, send, context } =
-  testMachine(
-    machine.withConfig({
-      // actions: {
-      //   escalateNoAPI_URL: voidNothing,
-      //   escalateNoAPI_KEY: voidNothing,
-      // },
-    }),
-  );
+const { start, matches, send, context, parentSend, stop } =
+  interpret(machine);
 
 function useFecthMock<T>(obj: T) {
   beforeAll(() => {
@@ -61,10 +42,6 @@ function useFecthMock<T>(obj: T) {
 }
 
 describe('Worflow 1', () => {
-  test('#1 Start the machine', () => {
-    start();
-  });
-
   useEnvDefined();
 
   useFecthMock({
@@ -78,6 +55,10 @@ describe('Worflow 1', () => {
       },
       news: [],
     }),
+  });
+
+  test('#1 Start the machine', () => {
+    start();
   });
 
   test('#2: Inside the "constructErrors" state', () => {
@@ -100,17 +81,72 @@ describe('Worflow 1', () => {
 
   // test('#3 Advance in time for always', () => advanceByTime(ALWAYS_TIME));
 
-  test('', () => {
+  test('#6: The success', () => {
     matches('success');
+  });
+
+  test('#7: Stop', () => {
+    stop();
   });
 });
 
-describe('Worflow 2:  Env error', () => {
+describe('Workflow 2:  Env error', () => {
   test('#1 Start the machine', () => {
     start();
   });
 
-  test('#2: No env variables gives an error', () => {
+  test('#2: No env variables found', () => {
+    parentSend('escalateNoAPI_URL');
     matches('error');
+  });
+
+  test('#3 Stop', () => {
+    stop();
+  });
+});
+
+describe('Worflow 3:  JSON error', () => {
+  useEnvDefined();
+  useFecthMock({
+    ok: true,
+    json: () => {
+      throw 'any';
+    },
+  });
+
+  test('#1 Start the machine', () => {
+    start();
+  });
+
+  test.fails('#2: Env variables found', () => {
+    parentSend('escalateNoAPI_URL');
+  });
+
+  test('#3: Inside the "constructErrors" state', () => {
+    matches('constructErrors');
+  });
+
+  test('#4 Advance in time for always', () => advanceByTime(ALWAYS_TIME));
+
+  test('#5 We are in the "idle" state', () => {
+    matches('idle');
+    context('MEDIA_STACK_API_URL', ctx => ctx.API_URL);
+    context('MEDIA_STACK_APIKEY', ctx => ctx.API_KEY);
+  });
+
+  test('#6 Send query', () => {
+    send({ type: 'QUERY', limit: 20 });
+  });
+
+  test('#7: It sends a json error to parent', () => {
+    parentSend('escalateJsonError');
+  });
+
+  test('#8: It finializes to error', () => {
+    matches('error');
+  });
+
+  test('#9 Stop', () => {
+    stop();
   });
 });

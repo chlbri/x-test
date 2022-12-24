@@ -3,7 +3,8 @@ import {
   BaseActionObject,
   createMachine,
   EventObject,
-  interpret,
+  interpret as _interpret,
+  InterpreterStatus,
   NoInfer,
   Prop,
   ResolveTypegenMeta,
@@ -13,12 +14,12 @@ import {
   TypegenEnabled,
   Typestate,
 } from 'xstate';
-import { testAssign, testSend } from './actions';
-import { testEscalate } from './actions/escalate';
-import { testAction } from './actions/_default';
+
+import { testAction, testAssign, testSend } from './actions';
 import { testDelay } from './delay';
 import { testGuard } from './guard';
 import { testPromise } from './invokeds';
+
 import type {
   ActionKey,
   DelayKey,
@@ -28,10 +29,15 @@ import type {
   ServiceKey,
   TuplifyUnion,
 } from './types';
-import { reFunction, _expect } from './utils';
-import { transformAlwaysToAfter, transformToLocal } from './workaround';
 
-export default function testMachine<
+import {
+  reFunction,
+  transformAlwaysToAfter,
+  transformParentEventsToLocal,
+  _expect,
+} from './utils';
+
+export function interpret<
   TContext extends object,
   TEvents extends EventObject = EventObject,
   TTypestate extends Typestate<TContext> = {
@@ -58,18 +64,33 @@ export default function testMachine<
   >,
 ) {
   type Machine = typeof machine;
+  type _ActionKey = ActionKey<Machine>;
 
+  // #region Preparation
   const config = transformAlwaysToAfter(machine.config);
-  const options = transformToLocal(machine.options);
+  const [options, parentEvents] = transformParentEventsToLocal(
+    machine.options,
+  );
   const _machine = createMachine(config, options).withContext(
     machine.context,
-  ) as unknown as typeof machine;
+  ) as unknown as Machine;
 
   // @ts-ignore Use the machine without asking to implement all options
-  const service = interpret(_machine);
+  const service = _interpret(_machine);
+  // #endregion
 
+  // #region Functions
   const start = reFunction(service, 'start');
-  const stop = reFunction(service, 'stop');
+
+  const clear = () => {
+    parentEvents.length = 0;
+  };
+
+  const stop = () => {
+    clear();
+    if (service.status === InterpreterStatus.Running) service.stop();
+  };
+
   const send = reFunction(service, 'send');
 
   const context = <T = TContext>(
@@ -79,6 +100,11 @@ export default function testMachine<
     const innerContext = service.getSnapshot().context;
     const actual = selector ? selector(innerContext) : innerContext;
     _expect(actual, expected);
+  };
+
+  const parentSend = (send: _ActionKey) => {
+    const check = parentEvents.includes(send);
+    _expect(check, true);
   };
 
   const sender = <T extends TEvents['type']>(type: T) => {
@@ -94,6 +120,7 @@ export default function testMachine<
     };
     return fn;
   };
+  // #endregion
 
   // #region Matches
   type _MatchesProps = MatchesProps<TResolvedTypesMeta>;
@@ -119,7 +146,7 @@ export default function testMachine<
   // #endregion
 
   // #region Hooks
-  type _ActionKey = ActionKey<Machine>;
+
   type _GuardKey = GuardKey<Machine>;
   type _ServiceKey = ServiceKey<Machine>;
   type _DelayKey = DelayKey<Machine>;
@@ -137,10 +164,11 @@ export default function testMachine<
     return testSend(machine, sender);
   };
   const assign = (action: _ActionKey) => testAssign(machine, action);
-  const escalate = (action: _ActionKey) => testEscalate(machine, action);
+
   const delay = (delay: _DelayKey) => testDelay(machine, delay);
   const guard = (guard: _GuardKey) => testGuard(machine, guard);
   const promise = (promise: _ServiceKey) => testPromise(machine, promise);
+  const __status = () => service.status;
   // #endregion
 
   return {
@@ -150,13 +178,15 @@ export default function testMachine<
     start,
     send,
     stop,
+    clear,
     hasTags,
     action,
     assign,
-    escalate,
     sendAction,
     guard,
     promise,
     delay,
+    parentSend,
+    __status,
   };
 }

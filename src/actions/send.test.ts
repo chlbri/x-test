@@ -3,7 +3,7 @@ import { inputMachine } from '../fixtures/input.machine';
 import { testSend } from './send';
 
 describe('Acceptance', () => {
-  test.concurrent('Function not exists', () => {
+  test.concurrent.fails('Function not exists', () => {
     const [acceptance] = testSend(inputMachine, 'forwardToAny' as any);
     acceptance();
   });

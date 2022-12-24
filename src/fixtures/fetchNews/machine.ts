@@ -66,7 +66,7 @@ const machine = createMachine(
           onDone: { target: 'json', actions: 'assignResponse' },
           onError: {
             target: 'error',
-            actions: 'escaladeFetchError',
+            actions: 'escalateFetchError',
           },
         },
       },
@@ -77,7 +77,7 @@ const machine = createMachine(
           onDone: { target: 'zod', actions: 'assignJSON' },
           onError: {
             target: 'error',
-            actions: 'escaladeJsonError',
+            actions: 'escalateJsonError',
           },
         },
       },
@@ -91,7 +91,7 @@ const machine = createMachine(
           },
           onError: {
             target: 'error',
-            actions: 'escaladeZodError',
+            actions: 'escalateZodError',
           },
         },
       },
@@ -159,9 +159,9 @@ const machine = createMachine(
 
       // #region Errors
       //TODO: test the escalations
-      escaladeFetchError: escalate(({ _errors }) => _errors?.FETCH_ERROR),
-      escaladeJsonError: escalate(({ _errors }) => _errors?.JSON_ERROR),
-      escaladeZodError: escalate(({ _errors }) => _errors?.ZOD_ERROR),
+      escalateFetchError: escalate(({ _errors }) => _errors?.FETCH_ERROR),
+      escalateJsonError: escalate(({ _errors }) => _errors?.JSON_ERROR),
+      escalateZodError: escalate(({ _errors }) => _errors?.ZOD_ERROR),
       escalateNoAPI_KEY: escalate(({ _errors }) => _errors?.API_KEY_ERROR),
       escalateNoAPI_URL: escalate(({ _errors }) => _errors?.API_URL_ERROR),
       // #endregion

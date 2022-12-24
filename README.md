@@ -4,7 +4,7 @@ Better TDD
 
 <br/>
 
-### Live documentation [here](https://github.com/chlbri/x-test/blob/master/src/machine.test.ts)
+### Live documentation [here](https://github.com/chlbri/x-test/blob/master/src/interpret.test.ts)
 
 <br/>
 <br/>

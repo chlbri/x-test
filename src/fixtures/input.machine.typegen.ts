@@ -13,7 +13,7 @@
           "fetch": "done.invoke.(machine).done:invocation[0]";
         };
         missingImplementations: {
-          actions: never;
+          actions: "forwardToAny";
           delays: never;
           guards: never;
           services: never;
