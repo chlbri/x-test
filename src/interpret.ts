@@ -24,10 +24,8 @@ import type {
   ActionKey,
   DelayKey,
   GuardKey,
-  LengthOf,
   MatchesProps,
   ServiceKey,
-  TuplifyUnion,
 } from './types';
 
 import {
@@ -108,13 +106,16 @@ export function interpret<
   };
 
   const sender = <T extends TEvents['type']>(type: T) => {
-    type E = Required<TEvents> extends { type: T } & infer U
-      ? LengthOf<TuplifyUnion<Extract<U, { type: T }>>> extends 0
-        ? []
-        : [Omit<Extract<TEvents, { type: T }>, 'type'>]
+    type E = TEvents extends {
+      type: T;
+    } & infer U
+      ? // eslint-disable-next-line @typescript-eslint/ban-types
+        U extends {}
+        ? Omit<U, 'type'>
+        : never
       : never;
 
-    const fn = (...data: E) => {
+    const fn = (...data: E extends never ? [] : [event: E]) => {
       // @ts-ignore Ignore for undefined event
       service.send({ type, ...data?.[0] } as any);
     };
