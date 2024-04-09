@@ -4,5 +4,6 @@
     ".gitpod.yaml": "Gitpod"
   },
   "task.allowAutomaticTasks": "on",
-  "githubPullRequests.ignoredPullRequestBranches": ["dev"]
+  "githubPullRequests.ignoredPullRequestBranches": ["dev"],
+  "vitest.commandLine": "pnpm test:watch"
 }

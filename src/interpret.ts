@@ -1,9 +1,7 @@
 import buildMatches from '@bemedev/x-matches';
 import {
   BaseActionObject,
-  createMachine,
   EventObject,
-  interpret as _interpret,
   InterpreterStatus,
   NoInfer,
   Prop,
@@ -13,7 +11,10 @@ import {
   TypegenDisabled,
   TypegenEnabled,
   Typestate,
+  interpret as _interpret,
+  createMachine,
 } from 'xstate';
+import { SimulatedClock } from 'xstate/lib/SimulatedClock';
 
 import { testAction, testAssign, testSend } from './actions';
 import { testDelay } from './delay';
@@ -28,11 +29,12 @@ import type {
   ServiceKey,
 } from './types';
 
+import { ALWAYS_TIME } from './constants';
 import {
+  _expect,
   reFunction,
   transformAlwaysToAfter,
   transformParentEventsToLocal,
-  _expect,
 } from './utils';
 
 export function interpret<
@@ -73,16 +75,27 @@ export function interpret<
     machine.context,
   ) as unknown as Machine;
 
+  const clock = new SimulatedClock();
+
   // @ts-ignore Use the machine without asking to implement all options
-  const service = _interpret(_machine);
+  const service = _interpret(_machine, { clock });
   // #endregion
 
   // #region Functions
   const start = reFunction(service, 'start');
 
+  const getSnapshot = reFunction(service, 'getSnapshot');
+
   const clear = () => {
     parentEvents.length = 0;
   };
+
+  const advanceTime = async (ms: number) => {
+    await Promise.resolve();
+    return clock.increment(ms);
+  };
+
+  const advanceAlways = () => advanceTime(ALWAYS_TIME);
 
   const stop = () => {
     clear();
@@ -188,6 +201,9 @@ export function interpret<
     promise,
     delay,
     parentSend,
+    advanceTime,
+    advanceAlways,
+    getSnapshot,
     __status,
   };
 }

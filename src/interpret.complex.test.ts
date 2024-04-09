@@ -1,24 +1,14 @@
 import { afterAll, beforeAll, describe, test, vi } from 'vitest';
-import { ALWAYS_TIME } from './constants';
-import { advanceByTime } from './fixtures/advanceByTime';
-import machine from './fixtures/fetchNews/machine';
 import { interpret } from './interpret';
 
-function useTestConfig() {
-  beforeAll(() => {
-    vi.useFakeTimers();
-  });
-
-  afterAll(() => {
-    vi.useRealTimers();
-  });
-}
+import machine from './fixtures/fetchNews/machine';
 
 const MEDIA_STACK_API_URL = 'MEDIA_STACK_API_URL';
 const MEDIA_STACK_APIKEY = 'MEDIA_STACK_APIKEY';
 
 function useEnvDefined() {
   beforeAll(() => {
+    /** @ts-ignore global */
     process.env = {
       MEDIA_STACK_APIKEY,
       MEDIA_STACK_API_URL,
@@ -26,17 +16,17 @@ function useEnvDefined() {
   });
 
   afterAll(() => {
+    /** @ts-ignore global */
     process.env = {};
   });
 }
 
-useTestConfig();
-
-const { start, matches, send, context, parentSend, stop } =
+const { start, matches, send, context, parentSend, stop, advanceAlways } =
   interpret(machine);
 
 function useFecthMock<T>(obj: T) {
   beforeAll(() => {
+    /** @ts-ignore global */
     global.fetch = vi.fn().mockResolvedValue(obj as any);
   });
 }
@@ -65,7 +55,7 @@ describe('Worflow 1', () => {
     matches('constructErrors');
   });
 
-  test('#3 Advance in time for always', () => advanceByTime(ALWAYS_TIME));
+  test('#3 Advance in time for always', () => advanceAlways());
   // await new Promise(resolve => setTimeout(resolve, 1000));
   // send('QUERY');
 
@@ -79,13 +69,13 @@ describe('Worflow 1', () => {
     send({ type: 'QUERY', limit: 20 });
   });
 
-  // test('#3 Advance in time for always', () => advanceByTime(ALWAYS_TIME));
+  test('#6 Advance in time for always', () => advanceAlways());
 
-  test('#6: The success', () => {
+  test('#7: The success', () => {
     matches('success');
   });
 
-  test('#7: Stop', () => {
+  test('#8: Stop', () => {
     stop();
   });
 });
@@ -126,7 +116,7 @@ describe('Worflow 3:  JSON error', () => {
     matches('constructErrors');
   });
 
-  test('#4 Advance in time for always', () => advanceByTime(ALWAYS_TIME));
+  test('#4 Advance in time for always', () => advanceAlways());
 
   test('#5 We are in the "idle" state', () => {
     matches('idle');

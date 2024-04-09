@@ -1,9 +1,9 @@
 import { assign } from '@xstate/immer';
 import {
-  createMachine,
   InternalMachineOptions,
-  sendParent,
   __ResolvedTypesMetaFrom,
+  createMachine,
+  sendParent,
 } from 'xstate';
 import { escalate } from 'xstate/lib/actions';
 import { THROTTLE_TIME } from './constants';
@@ -20,7 +20,7 @@ export const inputMachine = createMachine(
   {
     predictableActionArguments: true,
     preserveActionOrder: true,
-    tsTypes: {} as import('./input.machine.typegen').Typegen0,
+    tsTypes: {} as import('./input.machine.typegen.d.ts').Typegen0,
     schema: {
       context: {} as Context,
       events: {} as Events,

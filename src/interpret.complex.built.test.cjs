@@ -1,6 +1,4 @@
 import { afterAll, beforeAll, describe, test, vi } from 'vitest';
-import { ALWAYS_TIME } from './constants';
-import { advanceByTime } from './fixtures/advanceByTime';
 import machine from './fixtures/fetchNews/machine';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { interpret } = require('../lib/interpret.js');
@@ -33,7 +31,7 @@ function useEnvDefined() {
 
 useTestConfig();
 
-const { start, matches, send, context, parentSend, stop } =
+const { start, matches, send, context, parentSend, stop, advanceAlways } =
   interpret(machine);
 
 function useFecthMock(obj) {
@@ -66,7 +64,7 @@ describe('Worflow 1', () => {
     matches('constructErrors');
   });
 
-  test('#3 Advance in time for always', () => advanceByTime(ALWAYS_TIME));
+  test('#3 Advance in time for always', () => advanceAlways());
   // await new Promise(resolve => setTimeout(resolve, 1000));
   // send('QUERY');
 
@@ -80,13 +78,13 @@ describe('Worflow 1', () => {
     send({ type: 'QUERY', limit: 20 });
   });
 
-  // test('#3 Advance in time for always', () => advanceByTime(ALWAYS_TIME));
+  test('#6 Advance in time for always', () => advanceAlways());
 
-  test('#6: The success', () => {
+  test('#7: The success', () => {
     matches('success');
   });
 
-  test('#7: Stop', () => {
+  test('#8: Stop', () => {
     stop();
   });
 });
@@ -127,7 +125,7 @@ describe('Worflow 3:  JSON error', () => {
     matches('constructErrors');
   });
 
-  test('#4 Advance in time for always', () => advanceByTime(ALWAYS_TIME));
+  test('#4 Advance in time for always', () => advanceAlways());
 
   test('#5 We are in the "idle" state', () => {
     matches('idle');

@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { interpret } from '../lib';
 import { ALWAYS_TIME } from './constants';
-import { advanceByTime } from './fixtures/advanceByTime';
 import { THROTTLE_TIME } from './fixtures/constants';
 import { inputMachine } from './fixtures/input.machine';
 
@@ -21,6 +20,8 @@ const {
   guard,
   promise,
   __status,
+  advanceTime,
+
   parentSend,
 } = interpret(machine);
 
@@ -101,13 +102,13 @@ describe('Workflows', () => {
       parentSend('sendParentInput');
     });
 
-    test('#6 WAIT THROTTLE_TIME', () => advanceByTime(THROTTLE_TIME));
+    test('#6 WAIT THROTTLE_TIME', () => advanceTime(THROTTLE_TIME));
 
     test('#7 State was passed by "done"', () => {
       context(false, context => context.editing);
     });
 
-    test('Wait for always', () => advanceByTime(ALWAYS_TIME));
+    test('Wait for always', () => advanceTime(ALWAYS_TIME));
 
     test('#8 The machine starts the query', () => {
       parentSend('startQuery');
@@ -122,7 +123,7 @@ describe('Workflows', () => {
     });
 
     test('#2 WAIT THROTTLE_TIME', async () => {
-      await advanceByTime(THROTTLE_TIME + 5);
+      await advanceTime(THROTTLE_TIME + 5);
     });
 
     test('#3 Nothing is inputed', () => {

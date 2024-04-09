@@ -9,6 +9,7 @@ const MEDIA_STACK_APIKEY = 'MEDIA_STACK_APIKEY';
 
 function useEnvDefined() {
   beforeAll(() => {
+    /** @ts-ignore global */
     process.env = {
       MEDIA_STACK_APIKEY,
       MEDIA_STACK_API_URL,
@@ -16,15 +17,18 @@ function useEnvDefined() {
   });
 
   afterAll(() => {
+    /** @ts-ignore global */
     process.env = {};
   });
 }
 
 function useEnvUndefined() {
   beforeAll(() => {
+    /** @ts-ignore global */
     process.env = {};
   });
   afterAll(() => {
+    /** @ts-ignore global */
     process.env = {
       MEDIA_STACK_APIKEY,
       MEDIA_STACK_API_URL,
@@ -87,6 +91,7 @@ describe('Acceptance test', () => {
           data: 'data',
         };
 
+        /** @ts-ignore global */
         global.fetch = vi.fn().mockResolvedValue(mockObj as any);
 
         await expect({
@@ -100,6 +105,7 @@ describe('Acceptance test', () => {
           ok: false,
           data: 'data',
         };
+        /** @ts-ignore global */
         global.fetch = vi.fn().mockResolvedValue(mockObj as any);
         await expect({
           expected: mockObj,
@@ -181,6 +187,7 @@ describe('Acceptance test', () => {
 
       test('It assigns the API_URL', () =>
         expect({
+          /** @ts-ignore global */
           expected: { API_URL: process.env.MEDIA_STACK_API_URL },
           context: {},
           //@ts-ignore safe
@@ -195,6 +202,7 @@ describe('Acceptance test', () => {
 
       test('It assigns the API_KEY', () =>
         expect({
+          /** @ts-ignore global */
           expected: { API_KEY: process.env.MEDIA_STACK_APIKEY },
           context: {},
           //@ts-ignore safe
@@ -209,7 +217,9 @@ describe('Acceptance test', () => {
 
       test('It builds the URL', () => {
         // #region Prepare
+        /** @ts-ignore global */
         const API_URL = process.env.MEDIA_STACK_API_URL;
+        /** @ts-ignore global */
         const API_KEY = process.env.MEDIA_STACK_APIKEY;
         const categories: Category[] = ['business', 'health'];
         const _categories = 'business,health';
