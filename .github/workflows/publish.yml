@@ -52,11 +52,20 @@ jobs:
         run: pnpm run build
 
       - uses: JS-DevTools/npm-publish@v3
+        id: publish
         name: Publish
         with:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           strategy: upgrade
+
+      - name: Check - updated
+        if: ${{ steps.publish.outputs.type }}
+        run: echo "Version changed!"
+
+      - name: Check - not updated
+        if: ${{ steps.publish.outputs.type }}
+        run: echo "Remain the same!"
 
       # - name: TODO => Notification
       #   run: echo 'TODO => Build a Notification pipeline'
