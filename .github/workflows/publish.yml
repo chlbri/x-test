@@ -48,11 +48,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Build
+        run: pnpm run build
+
       - uses: JS-DevTools/npm-publish@v3
         name: Publish
         with:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
+          strategy: upgrade
 
       # - name: TODO => Notification
       #   run: echo 'TODO => Build a Notification pipeline'
