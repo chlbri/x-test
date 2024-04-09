@@ -31,7 +31,7 @@ function useFecthMock<T>(obj: T) {
   });
 }
 
-describe('Worflow 1', () => {
+describe('Workflow 1', () => {
   useEnvDefined();
 
   useFecthMock({
@@ -95,7 +95,7 @@ describe('Workflow 2:  Env error', () => {
   });
 });
 
-describe('Worflow 3:  JSON error', () => {
+describe('Workflow 3:  JSON error', () => {
   useEnvDefined();
   useFecthMock({
     ok: true,

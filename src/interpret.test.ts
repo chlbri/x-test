@@ -98,9 +98,9 @@ describe('Workflows', () => {
       context(false, context => context.editing);
     });
 
-    test('Wait for always', () => advanceAlways());
+    test('#8 Wait for always', () => advanceAlways());
 
-    test('#8 The machine starts the query', () => {
+    test('#9 The machine starts the query', () => {
       parentSend('startQuery');
     });
   });
