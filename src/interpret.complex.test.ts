@@ -21,13 +21,22 @@ function useEnvDefined() {
   });
 }
 
-const { start, matches, send, context, parentSend, stop, advanceAlways } =
-  interpret(machine);
+const machine1 = machine.withConfig({
+  actions: {
+    escalateNoAPI_URL: () => {},
+    escalateFetchError: () => {},
+    escalateJsonError: () => {},
+  },
+});
 
 function useFecthMock<T>(obj: T) {
   beforeAll(() => {
     /** @ts-ignore global */
     global.fetch = vi.fn().mockResolvedValue(obj as any);
+  });
+  afterAll(() => {
+    /** @ts-ignore global */
+    global.fetch = () => {};
   });
 }
 
@@ -47,50 +56,53 @@ describe('Workflow 1', () => {
     }),
   });
 
+  const { start, matches, send, stop, advanceTime } = interpret(machine1);
+
   test('#1 Start the machine', () => {
     start();
   });
 
-  test('#2: Inside the "constructErrors" state', () => {
-    matches('constructErrors');
-  });
-
-  test('#3 Advance in time for always', () => advanceAlways());
   // await new Promise(resolve => setTimeout(resolve, 1000));
   // send('QUERY');
 
-  test('#4 We are in the "idle" state', () => {
+  test('#2 We are in the "idle" state', () => {
     matches('idle');
     // context('MEDIA_STACK_API_URL', ctx => ctx.API_URL);
     // context('MEDIA_STACK_APIKEY', ctx => ctx.API_KEY);
   });
 
-  test('#5 Send query', () => {
+  test('#3 Send query', () => {
     send({ type: 'QUERY', limit: 20 });
   });
 
-  test('#6 Advance in time for always', () => advanceAlways());
+  test('#4: Wait a little', () => advanceTime());
 
-  test('#7: The success', () => {
+  test('#5: The success', () => {
     matches('success');
   });
 
-  test('#8: Stop', () => {
+  test('#6: Stop', () => {
     stop();
   });
 });
 
-describe('Workflow 2:  Env error', () => {
-  test('#1 Start the machine', () => {
+describe('Workflow 2: Env error', () => {
+  const { start, matches, stop, advanceTime, getSnapshot } =
+    interpret(machine1);
+
+  test('#1: Start the machine', () => {
     start();
   });
 
-  test('#2: No env variables found', () => {
-    parentSend('escalateNoAPI_URL');
+  test('#2: Wait a little', async () => {
+    return advanceTime();
+  });
+
+  test('#3: No env variables found', () => {
     matches('error');
   });
 
-  test('#3 Stop', () => {
+  test('#4: Stop', () => {
     stop();
   });
 });
@@ -104,19 +116,16 @@ describe('Workflow 3:  JSON error', () => {
     },
   });
 
+  const { start, matches, send, context, stop, advanceTime } =
+    interpret(machine1);
+
   test('#1 Start the machine', () => {
     start();
   });
 
-  test.fails('#2: Env variables found', () => {
-    parentSend('escalateNoAPI_URL');
+  test('#3: Inside the "idle" state', () => {
+    matches('idle');
   });
-
-  test('#3: Inside the "constructErrors" state', () => {
-    matches('constructErrors');
-  });
-
-  test('#4 Advance in time for always', () => advanceAlways());
 
   test('#5 We are in the "idle" state', () => {
     matches('idle');
@@ -128,9 +137,7 @@ describe('Workflow 3:  JSON error', () => {
     send({ type: 'QUERY', limit: 20 });
   });
 
-  test('#7: It sends a json error to parent', () => {
-    parentSend('escalateJsonError');
-  });
+  test('#7: Wait a little', () => advanceTime());
 
   test('#8: It finializes to error', () => {
     matches('error');

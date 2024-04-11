@@ -1,8 +1,10 @@
 import buildMatches from '@bemedev/x-matches';
 import {
+  AreAllImplementationsAssumedToBeProvided,
   BaseActionObject,
   EventObject,
-  InterpreterStatus,
+  InterpreterOptions,
+  MissingImplementationsError,
   NoInfer,
   Prop,
   ResolveTypegenMeta,
@@ -12,14 +14,8 @@ import {
   TypegenEnabled,
   Typestate,
   interpret as _interpret,
-  createMachine,
 } from 'xstate';
 import { SimulatedClock } from 'xstate/lib/SimulatedClock';
-
-import { testAction, testAssign, testSend } from './actions';
-import { testDelay } from './delay';
-import { testGuard } from './guard';
-import { testPromise } from './invokeds';
 
 import type {
   ActionKey,
@@ -29,13 +25,11 @@ import type {
   ServiceKey,
 } from './types';
 
-import { ALWAYS_TIME } from './constants';
-import {
-  _expect,
-  reFunction,
-  transformAlwaysToAfter,
-  transformParentEventsToLocal,
-} from './utils';
+import { testAction, testAssign, testSend } from './actions';
+import { testDelay } from './delay';
+import { testGuard } from './guard';
+import { testPromise } from './invokeds';
+import { _expect, reFunction } from './utils';
 
 export function interpret<
   TContext extends object,
@@ -53,69 +47,39 @@ export function interpret<
     TServiceMap
   >,
 >(
-  machine: StateMachine<
-    TContext,
-    any,
-    TEvents,
-    TTypestate,
-    TAction,
-    TServiceMap,
-    TResolvedTypesMeta
-  >,
+  machine: AreAllImplementationsAssumedToBeProvided<TResolvedTypesMeta> extends true
+    ? StateMachine<
+        TContext,
+        any,
+        TEvents,
+        TTypestate,
+        any,
+        any,
+        TResolvedTypesMeta
+      >
+    : MissingImplementationsError<TResolvedTypesMeta>,
+  options?: Omit<InterpreterOptions, 'clock'>,
 ) {
-  type Machine = typeof machine;
-  type _ActionKey = ActionKey<Machine>;
-
-  // #region Preparation
-  const config = transformAlwaysToAfter(machine.config);
-  const [options, parentEvents] = transformParentEventsToLocal(
-    machine.options,
-  );
-  const _machine = createMachine(config, options).withContext(
-    machine.context,
-  ) as unknown as Machine;
-
   const clock = new SimulatedClock();
+  const service = _interpret(machine, { clock, ...options });
 
-  // @ts-ignore Use the machine without asking to implement all options
-  const service = _interpret(_machine, { clock });
-  // #endregion
-
-  // #region Functions
   const start = reFunction(service, 'start');
-
+  const stop = reFunction(service, 'stop');
+  const send = reFunction(service, 'send');
   const getSnapshot = reFunction(service, 'getSnapshot');
 
-  const clear = () => {
-    parentEvents.length = 0;
-  };
-
-  const advanceTime = async (ms: number) => {
+  const advanceTime = async (ms = 0) => {
     await Promise.resolve();
     return clock.increment(ms);
   };
-
-  const advanceAlways = () => advanceTime(ALWAYS_TIME);
-
-  const stop = () => {
-    clear();
-    if (service.status === InterpreterStatus.Running) service.stop();
-  };
-
-  const send = reFunction(service, 'send');
 
   const context = <T = TContext>(
     expected: T,
     selector?: (context: TContext) => T,
   ) => {
-    const innerContext = service.getSnapshot().context;
+    const innerContext = getSnapshot().context;
     const actual = selector ? selector(innerContext) : innerContext;
     _expect(actual, expected);
-  };
-
-  const parentSend = (send: _ActionKey) => {
-    const check = parentEvents.includes(send);
-    _expect(check, true);
   };
 
   const sender = <T extends TEvents['type']>(type: T) => {
@@ -130,17 +94,16 @@ export function interpret<
 
     const fn = (...data: E extends never ? [] : [event: E]) => {
       // @ts-ignore Ignore for undefined event
-      service.send({ type, ...data?.[0] } as any);
+      send({ type, ...data?.[0] } as any);
     };
     return fn;
   };
-  // #endregion
 
   // #region Matches
   type _MatchesProps = MatchesProps<TResolvedTypesMeta>;
 
   const matches = (...nodes: _MatchesProps) => {
-    const value = service.getSnapshot().value;
+    const value = getSnapshot().value;
     const _matches = buildMatches(value);
     const actual = _matches(...nodes);
     _expect(actual, true);
@@ -153,57 +116,70 @@ export function interpret<
     : string)[];
 
   const hasTags = (...values: Tags) => {
-    const state = service.getSnapshot();
+    const state = getSnapshot();
     const actual = values.every(value => state.hasTag(value));
     _expect(actual, true);
   };
   // #endregion
 
+  const __status = () => service.status;
+
   // #region Hooks
 
+  type Machine = StateMachine<
+    TContext,
+    any,
+    TEvents,
+    TTypestate,
+    any,
+    any,
+    TResolvedTypesMeta
+  >;
   type _GuardKey = GuardKey<Machine>;
   type _ServiceKey = ServiceKey<Machine>;
   type _DelayKey = DelayKey<Machine>;
 
   // #region Action
+  type _ActionKey = ActionKey<Machine>;
   type ActionParams = Omit<
     Parameters<typeof testAction>[0],
     'machine' | 'action'
   > & {
     action: _ActionKey;
   };
-  const action = (rest: ActionParams) => testAction({ machine, ...rest });
+  const action = (rest: ActionParams) =>
+    testAction({ machine: machine as Machine, ...rest });
   // #endregion
   const sendAction = (sender: _ActionKey) => {
-    return testSend(machine, sender);
+    return testSend(machine as Machine, sender);
   };
-  const assign = (action: _ActionKey) => testAssign(machine, action);
+  const assign = (action: _ActionKey) =>
+    testAssign(machine as Machine, action);
 
-  const delay = (delay: _DelayKey) => testDelay(machine, delay);
-  const guard = (guard: _GuardKey) => testGuard(machine, guard);
-  const promise = (promise: _ServiceKey) => testPromise(machine, promise);
-  const __status = () => service.status;
-  // #endregion
+  const delay = (delay: _DelayKey) => testDelay(machine as Machine, delay);
+  const guard = (guard: _GuardKey) => testGuard(machine as Machine, guard);
+  const promise = (promise: _ServiceKey) =>
+    testPromise(machine as Machine, promise);
+  //# endregion
 
-  return {
+  const out = {
     sender,
     context,
     matches,
     start,
     send,
     stop,
-    clear,
     hasTags,
+    advanceTime,
+    getSnapshot,
     action,
-    assign,
     sendAction,
+    assign,
+    delay,
     guard,
     promise,
-    delay,
-    parentSend,
-    advanceTime,
-    advanceAlways,
-    getSnapshot,
     __status,
-  };
+  } as const;
+
+  return out;
 }

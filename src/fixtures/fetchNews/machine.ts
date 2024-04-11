@@ -121,7 +121,7 @@ const machine = createMachine(
     },
     predictableActionArguments: true,
     preserveActionOrder: true,
-    tsTypes: {} as import('./machine.typegen').Typegen0,
+    tsTypes: {} as import('./machine.typegen.d.ts').Typegen0,
   },
   {
     actions: {
@@ -158,7 +158,6 @@ const machine = createMachine(
       }),
 
       // #region Errors
-      //TODO: test the escalations
       escalateFetchError: escalate(({ _errors }) => _errors?.FETCH_ERROR),
       escalateJsonError: escalate(({ _errors }) => _errors?.JSON_ERROR),
       escalateZodError: escalate(({ _errors }) => _errors?.ZOD_ERROR),
@@ -168,14 +167,20 @@ const machine = createMachine(
     },
     services: {
       get_API_URL: async () => {
+        /** @ts-ignore */
         const out = process.env.MEDIA_STACK_API_URL;
         const empty = !out || out === 'undefined';
-        if (empty) throw new Error('No API_URL');
+        if (empty) {
+          console.log('ERRORR!!');
+
+          throw new Error('No API_URL');
+        }
 
         return out;
       },
 
       get_API_KEY: async () => {
+        /**@ts-ignore */
         const out = process.env.MEDIA_STACK_APIKEY;
         const empty = !out || out === 'undefined';
         if (empty) throw new Error('No API_KEY');

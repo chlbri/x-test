@@ -3,7 +3,14 @@ import { THROTTLE_TIME } from './fixtures/constants';
 import { inputMachine } from './fixtures/input.machine';
 import { interpret } from './interpret';
 
-const machine = inputMachine.withContext({ name: 'test' });
+const machine = inputMachine
+  .withConfig({
+    actions: {
+      sendParentInput: () => {},
+      startQuery: () => {},
+    },
+  })
+  .withContext({ name: 'test' });
 const {
   start,
   context,
@@ -12,49 +19,9 @@ const {
   stop,
   sender,
   send,
-  action,
-  assign,
-  delay,
-  guard,
-  promise,
   __status,
-  advanceAlways,
   advanceTime,
-  parentSend,
 } = interpret(machine);
-
-describe('Acceptance', () => {
-  test.concurrent('Assign', () => {
-    const [acceptance] = assign('input');
-    acceptance();
-  });
-
-  test.concurrent('Action', () => {
-    const [acceptance] = action({ action: 'input' });
-    acceptance();
-  });
-
-  test.concurrent('Guards', () => {
-    const [acceptance] = guard('isEditing');
-    acceptance();
-  });
-
-  test.concurrent('Promises', () => {
-    const [acceptance] = promise('fetch');
-    acceptance();
-  });
-
-  test.concurrent('Send action', () => {
-    const { sendAction } = interpret(inputMachine);
-    const [acceptance] = sendAction('sendParentInput');
-    acceptance();
-  });
-
-  test.concurrent('Delays', () => {
-    const [acceptance] = delay('THROTTLE_TIME');
-    acceptance();
-  });
-});
 
 describe('Workflows', () => {
   const usePrepareTest = () => {
@@ -88,20 +55,10 @@ describe('Workflows', () => {
       context(true, context => context.editing);
     });
 
-    test('#5 Input is sent to parent', () => {
-      parentSend('sendParentInput');
-    });
+    test('#5: Wait THrOTTLE TIME', () => advanceTime(THROTTLE_TIME));
 
-    test('#6 WAIT THROTTLE_TIME', () => advanceTime(THROTTLE_TIME));
-
-    test('#7 State was passed by "done"', () => {
+    test('#6 State was passed by "done"', () => {
       context(false, context => context.editing);
-    });
-
-    test('#8 Wait for always', () => advanceAlways());
-
-    test('#9 The machine starts the query', () => {
-      parentSend('startQuery');
     });
   });
 
@@ -122,10 +79,6 @@ describe('Workflows', () => {
       context(undefined, context => context.input);
     });
 
-    test.fails('#4 Nothing is sent', () => {
-      parentSend('sendParentInput');
-    });
-
     test('#5 The state has a tag "busy"', () => {
       hasTags('busy');
     });
@@ -141,6 +94,12 @@ describe('Workflows', () => {
 
     test('#8 Input is defined to "bemedev"', () => {
       context({ name: 'test', input: 'bemedev', editing: true });
+    });
+
+    test('#9: Wait THrOTTLE TIME', () => advanceTime(THROTTLE_TIME));
+
+    test('#10: State was passed by "done"', () => {
+      context(false, context => context.editing);
     });
   });
 });

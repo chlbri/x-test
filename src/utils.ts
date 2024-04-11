@@ -23,7 +23,7 @@ function _reFunction<P extends any[] = any[], R = any>(
   fn: Fn<P, R>,
   bind: any,
 ) {
-  return (...args: P) => fn.bind(bind)(...args);
+  return (...args: P) => fn.bind(bind)(...args) as R;
 }
 
 export function reFunction<
@@ -78,10 +78,13 @@ type Reducer<T extends object, F> = { [k in keyof T]: F };
 export function fillObject<T extends object, F>(object?: T, fill?: F) {
   if (isNone(object) || isNone(fill)) return <Reducer<T, F>>{};
   const keys = Object.keys(object) as (keyof T)[];
-  const reducer = keys.reduce((acc, key) => {
-    acc[key] = fill;
-    return acc;
-  }, <Reducer<T, F>>{});
+  const reducer = keys.reduce(
+    (acc, key) => {
+      acc[key] = fill;
+      return acc;
+    },
+    <Reducer<T, F>>{},
+  );
   return reducer;
 }
 
