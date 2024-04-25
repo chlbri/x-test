@@ -8,7 +8,7 @@ import type {
   TypegenDisabled,
   Typestate,
 } from 'xstate';
-import { Action, ServiceKey, TestHelper } from '../types';
+import { Action, PromiseKey, TestHelper } from '../types';
 import { _expect } from '../utils';
 import { OptionalTester } from './../types';
 
@@ -43,7 +43,7 @@ export const testPromise = <
     TServiceMap,
     TResolvedTypesMeta
   >,
-  name: ServiceKey<typeof machine>,
+  name: PromiseKey<typeof machine>,
 ) => {
   const service = machine.options.services?.[name];
   type PR = Promise<TServiceMap[typeof name]['data']>;

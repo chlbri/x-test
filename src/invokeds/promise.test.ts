@@ -1,8 +1,10 @@
 import { describe, expect, test } from 'vitest';
+import { interpret } from '../interpret';
 import { inputMachine } from './../fixtures/input.machine';
 import { testPromise } from './promise';
 
-const [acceptance, expects, promise] = testPromise(inputMachine, 'fetch');
+const [acceptance, expects, promise] =
+  interpret(inputMachine).promise('fetch');
 
 const EXPECTED = 3;
 const NOT_EXPECTED = 999;

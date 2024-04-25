@@ -1,4 +1,4 @@
-import { dequal } from 'dequal';
+import { Diff, diff } from 'deep-diff';
 
 // #region SubType
 type FilterFlags<Base, Condition> = {
@@ -15,6 +15,8 @@ export type SubType<Base extends object, Condition> = Pick<
   AllowedNames<Base, Condition>
 >;
 // #endregion
+
+type Diffs = Diff<any, any>[];
 
 type Fn<P extends any[] = any, R = any> = (...arg: P) => R;
 type KeysFn<T extends object = object> = keyof SubType<T, Fn>;
@@ -37,18 +39,12 @@ export function reFunction<
 }
 
 export function _expect<T>(actual: T, expected: T, error = defaultError) {
-  const check = dequal(actual, expected);
-  if (!check) throw new Error(error(actual, expected));
+  const diffs = diff(actual, expected);
+  if (diffs) throw new Error(error(diffs));
 }
 
-export function defaultError(actual: any, expected: any) {
-  const actualJSON = JSON.stringify(actual, null, 2);
-  const expectedJSON = JSON.stringify(expected, null, 2);
-  return `
-${actualJSON} 
-not equals to
-${expectedJSON}
-`;
+export function defaultError(diffs: Diffs) {
+  return JSON.stringify(diffs);
 }
 
 export const emptyAction = () => void 0;
@@ -86,58 +82,4 @@ export function fillObject<T extends object, F>(object?: T, fill?: F) {
     <Reducer<T, F>>{},
   );
   return reducer;
-}
-
-import { ALWAYS_TIME } from './constants';
-import { deepClone } from './helpers';
-
-type _State = {
-  always?: any;
-  after?: any;
-  states?: Record<string, _State>;
-} & Record<string, any>;
-
-export function transformAlwaysToAfter<T extends _State>(state: T) {
-  const inner = deepClone(state);
-  if (inner.always) {
-    inner.after = { [ALWAYS_TIME]: inner.always, ...inner.after };
-    delete inner.always;
-  }
-  const states = inner.states;
-  if (states) {
-    for (const key in states) {
-      const _state = states[key];
-      states[key] = transformAlwaysToAfter(_state);
-    }
-  }
-  inner.states = states;
-  return inner;
-}
-
-type _Options = {
-  actions?: Record<string, any>;
-} & Record<string, any>;
-
-export function transformParentEventsToLocal<T extends _Options>(
-  options: T,
-) {
-  const actions = options.actions;
-  const localActions: any = {};
-  const inner: any = {};
-  const parentEvents: string[] = [];
-  for (const key in actions) {
-    const action = actions[key];
-    if (action.to === '#_parent') {
-      localActions[key] = () => {
-        parentEvents.push(key);
-      };
-    } else {
-      localActions[key] = action;
-    }
-  }
-  inner.actions = localActions;
-  inner.guards = options.guards;
-  inner.services = options.services;
-  inner.delays = options.delays;
-  return [inner as T, parentEvents] as const;
 }

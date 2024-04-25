@@ -3,6 +3,7 @@ import type {
   AnyStateMachine,
   EventObject,
   InternalMachineOptions,
+  InterpreterOptions as Interp,
   MachineOptionsFrom,
   Prop,
   ResolveTypegenMeta,
@@ -10,9 +11,8 @@ import type {
   TypegenEnabled,
 } from 'xstate';
 
-export type LengthOf<T> = T extends ReadonlyArray<unknown>
-  ? T['length']
-  : number;
+export type LengthOf<T> =
+  T extends ReadonlyArray<unknown> ? T['length'] : number;
 
 // #region Tuplify Union
 // #region Preparation
@@ -21,18 +21,20 @@ type _UnionToIntersection<U> = (
 ) extends (k: infer I) => void
   ? I
   : never;
-type _LastOf<T> = _UnionToIntersection<
-  T extends unknown ? () => T : never
-> extends () => infer R
-  ? R
-  : never;
+type _LastOf<T> =
+  _UnionToIntersection<
+    T extends unknown ? () => T : never
+  > extends () => infer R
+    ? R
+    : never;
 type _Push<T extends unknown[], V> = [...T, V];
 type _TuplifyUnionBoolean<T> = [T] extends [never] ? true : false;
 // #endregion
 
-export type TuplifyUnion<T> = true extends _TuplifyUnionBoolean<T>
-  ? []
-  : _Push<TuplifyUnion<Exclude<T, _LastOf<T>>>, _LastOf<T>>;
+export type TuplifyUnion<T> =
+  true extends _TuplifyUnionBoolean<T>
+    ? []
+    : _Push<TuplifyUnion<Exclude<T, _LastOf<T>>>, _LastOf<T>>;
 // #endregion
 
 export type Action<
@@ -57,28 +59,28 @@ export type Options<
   TResolvedTypesMeta = ResolveTypegenMeta<any, any, any, any>,
 > = InternalMachineOptions<TContext, TEvents, TResolvedTypesMeta, true>;
 
-export type ExcludeOptionsKey<T> = Exclude<
+export type OptionsKey<T> = Exclude<
   keyof Exclude<T, undefined>,
   symbol | number
 >;
 
-export type ServiceKey<T extends AnyStateMachine> = ExcludeOptionsKey<
+export type PromiseKey<T extends AnyStateMachine> = OptionsKey<
   MachineOptionsFrom<T, true>['services']
 >;
 
-export type ActionKey<T extends AnyStateMachine> = ExcludeOptionsKey<
+export type ActionKey<T extends AnyStateMachine> = OptionsKey<
   MachineOptionsFrom<T, true>['actions']
 >;
 
-export type GuardKey<T extends AnyStateMachine> = ExcludeOptionsKey<
+export type GuardKey<T extends AnyStateMachine> = OptionsKey<
   MachineOptionsFrom<T, true>['guards']
 >;
 
-export type DelayKey<T extends AnyStateMachine> = ExcludeOptionsKey<
+export type DelayKey<T extends AnyStateMachine> = OptionsKey<
   MachineOptionsFrom<T, true>['delays']
 >;
 
-export type OptionalTester<T> = (toTest: T) => void | Promise<void>;
+export type OptionalTester<F> = (f: F) => void | Promise<void>;
 
 type TSV<TResolvedTypesMeta> = TResolvedTypesMeta extends TypegenEnabled
   ? Prop<Prop<TResolvedTypesMeta, 'resolved'>, 'matchesStates'>
@@ -96,3 +98,7 @@ export type MachineActionsFrom<T extends AnyStateMachine> = Exclude<
   MachineOptionsFrom<T, true>['actions'],
   undefined
 >[string];
+
+export type InterpreterOptions = Omit<Interp, 'clock'> & {
+  simulateClock?: boolean;
+};

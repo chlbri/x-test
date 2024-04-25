@@ -3,7 +3,6 @@ import {
   AreAllImplementationsAssumedToBeProvided,
   BaseActionObject,
   EventObject,
-  InterpreterOptions,
   MissingImplementationsError,
   NoInfer,
   Prop,
@@ -21,14 +20,17 @@ import type {
   ActionKey,
   DelayKey,
   GuardKey,
+  InterpreterOptions,
   MatchesProps,
-  ServiceKey,
+  PromiseKey,
 } from './types';
 
 import { testAction, testAssign, testSend } from './actions';
 import { testDelay } from './delay';
 import { testGuard } from './guard';
+import { sleep } from './helpers';
 import { testPromise } from './invokeds';
+import { mockMachine } from './mock';
 import { _expect, reFunction } from './utils';
 
 export function interpret<
@@ -58,10 +60,40 @@ export function interpret<
         TResolvedTypesMeta
       >
     : MissingImplementationsError<TResolvedTypesMeta>,
-  options?: Omit<InterpreterOptions, 'clock'>,
+  options: InterpreterOptions = { simulateClock: true },
 ) {
-  const clock = new SimulatedClock();
-  const service = _interpret(machine, { clock, ...options });
+  type Machine = StateMachine<
+    TContext,
+    any,
+    TEvents,
+    TTypestate,
+    any,
+    any,
+    TResolvedTypesMeta
+  >;
+
+  type ImplMachine =
+    AreAllImplementationsAssumedToBeProvided<TResolvedTypesMeta> extends true
+      ? Machine
+      : MissingImplementationsError<TResolvedTypesMeta>;
+
+  const { simulateClock, ..._options } = options;
+  const __machine = mockMachine(machine as Machine, {
+    context: (machine as Machine).context,
+    options: (machine as any).options,
+  }) as unknown as ImplMachine;
+
+  const startWithClock = () => {
+    if (simulateClock) {
+      const clock = new SimulatedClock();
+      const service = _interpret(__machine, { clock, ..._options });
+      return service;
+    }
+    const service = _interpret(__machine, { ..._options });
+    return service;
+  };
+
+  const service = startWithClock();
 
   const start = reFunction(service, 'start');
   const stop = reFunction(service, 'stop');
@@ -69,8 +101,11 @@ export function interpret<
   const getSnapshot = reFunction(service, 'getSnapshot');
 
   const advanceTime = async (ms = 0) => {
-    await Promise.resolve();
-    return clock.increment(ms);
+    if (simulateClock) {
+      await Promise.resolve();
+      return (service.clock as SimulatedClock).increment(ms);
+    }
+    return sleep(ms);
   };
 
   const context = <T = TContext>(
@@ -125,18 +160,8 @@ export function interpret<
   const __status = () => service.status;
 
   // #region Hooks
-
-  type Machine = StateMachine<
-    TContext,
-    any,
-    TEvents,
-    TTypestate,
-    any,
-    any,
-    TResolvedTypesMeta
-  >;
   type _GuardKey = GuardKey<Machine>;
-  type _ServiceKey = ServiceKey<Machine>;
+  type _ServiceKey = PromiseKey<Machine>;
   type _DelayKey = DelayKey<Machine>;
 
   // #region Action
@@ -149,18 +174,18 @@ export function interpret<
   };
   const action = (rest: ActionParams) =>
     testAction({ machine: machine as Machine, ...rest });
-  // #endregion
   const sendAction = (sender: _ActionKey) => {
     return testSend(machine as Machine, sender);
   };
   const assign = (action: _ActionKey) =>
     testAssign(machine as Machine, action);
+  // #endregion
 
   const delay = (delay: _DelayKey) => testDelay(machine as Machine, delay);
   const guard = (guard: _GuardKey) => testGuard(machine as Machine, guard);
   const promise = (promise: _ServiceKey) =>
     testPromise(machine as Machine, promise);
-  //# endregion
+  // #endregion
 
   const out = {
     sender,

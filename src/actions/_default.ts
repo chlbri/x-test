@@ -100,8 +100,12 @@ export const testAction = <
     _expect(check, true, () => `${name} is not accepted`);
   };
 
-  const expect = (helper: TestHelper<Partial<TContext>, TEvents, any>) => {
-    const { context, event, expected } = helper;
+  const expect = ({
+    context,
+    event,
+    expected,
+  }: TestHelper<Partial<TContext>, TEvents, any>) => {
+    // const { context, event, expected } = helper;
     if (typeof func === 'function') {
       const actual = func(context, event);
       _expect(actual, expected);

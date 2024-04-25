@@ -1,6 +1,6 @@
 {
   "name": "@bemedev/x-test",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Test XState Machine sequentially",
   "author": {
     "email": "bri_lvi@icloud.com",
@@ -12,9 +12,15 @@
     "url": "https://github.com/chlbri/x-test/tree/master"
   },
   "license": "MIT",
+  "type": "module",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "module": "lib/index.mjs",
+  "module": "lib/index.js",
+  "exports": {
+    "require": "./lib/index.cjs",
+    "import": "./lib/index.js",
+    "default": "./lib/index.js"
+  },
   "keywords": [
     "XState",
     "test",
@@ -29,13 +35,18 @@
     "public"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=20"
   },
   "scripts": {
     "config": "pnpm install",
+    "config:off": "pnpm run config --offline",
+    "ci": "pnpm run config:off && pnpm run lint && pnpm run test && pnpm run build",
     "rollup": "rollup -c",
     "prepare": "husky install",
     "build": "rm -rf lib && pnpm run rollup",
+    "rm": "rm -rf node_modules pnpm-lock.yaml",
+    "rinit": "pnpm run rm && pnpm run config",
+    "rinit:off": "pnpm run rm && pnpm run config:off",
     "test": "vitest run --passWithNoTests",
     "test-one": "vitest interpret.complex.test.ts",
     "build:test": "pnpm run prepublishOnly && pnpm run test",
@@ -50,12 +61,15 @@
   },
   "devDependencies": {
     "@bemedev/fsf": "^0.7.0",
+    "@types/deep-diff": "^1.0.5",
     "@types/deepmerge": "^2.2.0",
-    "@typescript-eslint/eslint-plugin": "^7.6.0",
-    "@typescript-eslint/parser": "^7.6.0",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
+    "@vitest/coverage-v8": "^1.5.2",
     "@xstate/immer": "^0.3.3",
+    "dequal": "^2.0.3",
     "esbuild": "^0.20.2",
-    "eslint": "^9.0.0",
+    "eslint": "^8.57.0",
     "husky": "^9.0.11",
     "immer": "^10.0.4",
     "onchange": "^7.1.0",
@@ -66,18 +80,17 @@
     "rollup-plugin-typescript2": "^0.36.0",
     "tslib": "^2.6.2",
     "typescript": "^5.4.4",
-    "vite": "^5.2.8",
     "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^1.4.0",
+    "vitest": "^1.5.2",
     "xstate": "^4.38.3",
-    "zod": "^3.22.4"
+    "zod": "^3.23.4"
   },
   "dependencies": {
     "@bemedev/x-matches": "^0.0.3",
-    "deepmerge": "^4.3.1",
-    "dequal": "^2.0.3"
+    "deep-diff": "^1.0.2",
+    "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
-    "xstate": "^4.30.6"
+    "xstate": "^4.38.3"
   }
 }

@@ -1,14 +1,16 @@
 import { test } from 'vitest';
 import { inputMachine } from './fixtures/input.machine';
-import { testGuard } from './guard';
+import { interpret } from './interpret';
+
+const { guard } = interpret(inputMachine);
 
 test.concurrent.fails('Fails if Function not exists', () => {
-  const [acceptance] = testGuard(inputMachine, 'notExists' as any);
+  const [acceptance] = guard('notExists' as any);
   acceptance();
 });
 
 test.concurrent('Workflow', () => {
-  const [, expect] = testGuard(inputMachine, 'isEditing');
+  const [, expect] = guard('isEditing');
   expect({
     expected: true,
     context: { name: 'any', editing: true },

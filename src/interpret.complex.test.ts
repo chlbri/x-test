@@ -87,8 +87,7 @@ describe('Workflow 1', () => {
 });
 
 describe('Workflow 2: Env error', () => {
-  const { start, matches, stop, advanceTime, getSnapshot } =
-    interpret(machine1);
+  const { start, matches, stop, advanceTime } = interpret(machine1);
 
   test('#1: Start the machine', () => {
     start();

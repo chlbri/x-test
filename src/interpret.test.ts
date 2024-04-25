@@ -1,16 +1,18 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { THROTTLE_TIME } from './fixtures/constants';
 import { inputMachine } from './fixtures/input.machine';
-import { interpret } from './interpret';
+import { interpret } from './index';
 
-const machine = inputMachine
-  .withConfig({
+const machine = inputMachine.withConfig(
+  {
     actions: {
       sendParentInput: () => {},
       startQuery: () => {},
     },
-  })
-  .withContext({ name: 'test' });
+  },
+  { name: 'test' },
+);
+
 const {
   start,
   context,
@@ -21,7 +23,7 @@ const {
   send,
   __status,
   advanceTime,
-} = interpret(machine);
+} = interpret(machine, { simulateClock: false });
 
 describe('Workflows', () => {
   const usePrepareTest = () => {

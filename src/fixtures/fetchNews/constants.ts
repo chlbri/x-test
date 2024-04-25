@@ -1,9 +1,12 @@
 export function constructArrayObject<T extends string[]>(...array: T) {
   type Str = T[number];
-  const object = array.reduce((acc, item: Str) => {
-    acc[item] = item;
-    return acc;
-  }, {} as { [key in Str]: key });
+  const object = array.reduce(
+    (acc, item: Str) => {
+      acc[item] = item;
+      return acc;
+    },
+    {} as { [key in Str]: key },
+  );
   return {
     object,
     array: array as Str[],

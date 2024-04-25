@@ -7,6 +7,7 @@ Better TDD
 ### Live documentation [here](https://github.com/chlbri/x-test/blob/master/src/interpret.test.ts)
 
 <br/>
+You can enable Simulated Clock or not
 <br/>
 
 ### **NB** : Don not use v0.0.2

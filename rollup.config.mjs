@@ -6,28 +6,31 @@ import typescript from 'rollup-plugin-typescript2';
  */
 export default {
   input: 'src/index.ts',
-  plugins: [typescript(), tsConfigPaths()],
-  external: ['dequal', '@bemedev/x-matches', 'xstate', 'deepmerge'],
+  plugins: [tsConfigPaths(), typescript()],
+  external: [
+    'dequal',
+    '@bemedev/x-matches',
+    'xstate',
+    'xstate/lib/SimulatedClock',
+    'deepmerge',
+    'deep-diff',
+  ],
   output: [
     {
       format: 'es',
-      file: 'lib/index.d.ts',
-    },
-    {
-      format: 'cjs',
       sourcemap: true,
-      dir: `lib`,
       preserveModulesRoot: 'src',
+      dir: `lib`,
       preserveModules: true,
       entryFileNames: '[name].js',
     },
     {
-      format: 'es',
+      format: 'cjs',
       sourcemap: true,
-      dir: `lib`,
       preserveModulesRoot: 'src',
+      dir: `lib`,
       preserveModules: true,
-      entryFileNames: '[name].mjs',
+      entryFileNames: '[name].cjs',
     },
   ],
 };

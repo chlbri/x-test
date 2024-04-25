@@ -167,12 +167,10 @@ const machine = createMachine(
     },
     services: {
       get_API_URL: async () => {
-        /** @ts-ignore */
+        /** @ts-ignore process */
         const out = process.env.MEDIA_STACK_API_URL;
         const empty = !out || out === 'undefined';
         if (empty) {
-          console.log('ERRORR!!');
-
           throw new Error('No API_URL');
         }
 
@@ -180,7 +178,7 @@ const machine = createMachine(
       },
 
       get_API_KEY: async () => {
-        /**@ts-ignore */
+        /**@ts-ignore process */
         const out = process.env.MEDIA_STACK_APIKEY;
         const empty = !out || out === 'undefined';
         if (empty) throw new Error('No API_KEY');
