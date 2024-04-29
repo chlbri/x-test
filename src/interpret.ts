@@ -14,7 +14,7 @@ import {
   Typestate,
   interpret as _interpret,
 } from 'xstate';
-import { SimulatedClock } from 'xstate/es/SimulatedClock';
+import { SimulatedClock } from 'xstate/es/SimulatedClock.js';
 
 import type {
   ActionKey,

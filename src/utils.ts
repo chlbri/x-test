@@ -1,4 +1,4 @@
-import { Diff, diff } from 'deep-diff';
+import { dequal } from 'dequal';
 
 // #region SubType
 type FilterFlags<Base, Condition> = {
@@ -15,8 +15,6 @@ export type SubType<Base extends object, Condition> = Pick<
   AllowedNames<Base, Condition>
 >;
 // #endregion
-
-type Diffs = Diff<any, any>[];
 
 type Fn<P extends any[] = any, R = any> = (...arg: P) => R;
 type KeysFn<T extends object = object> = keyof SubType<T, Fn>;
@@ -39,12 +37,16 @@ export function reFunction<
 }
 
 export function _expect<T>(actual: T, expected: T, error = defaultError) {
-  const diffs = diff(actual, expected);
-  if (diffs) throw new Error(error(diffs));
+  const diffs = dequal(actual, expected);
+  if (!diffs) throw new Error(error(actual, expected));
 }
 
-export function defaultError(diffs: Diffs) {
-  return JSON.stringify(diffs);
+export function defaultError<T>(actual: T, expected: T) {
+  const _actual = JSON.stringify(actual);
+  const _expected = JSON.stringify(expected);
+  return `${_actual}
+not equals
+${_expected}`;
 }
 
 export const emptyAction = () => void 0;

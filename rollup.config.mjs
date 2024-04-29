@@ -11,7 +11,7 @@ export default {
     'dequal',
     '@bemedev/x-matches',
     'xstate',
-    'xstate/lib/SimulatedClock',
+    'xstate/es/SimulatedClock.js',
     'deepmerge',
     'deep-diff',
   ],
