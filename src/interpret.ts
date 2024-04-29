@@ -14,7 +14,6 @@ import {
   Typestate,
   interpret as _interpret,
 } from 'xstate';
-import { SimulatedClock } from 'xstate/es/SimulatedClock.js';
 
 import type {
   ActionKey,
@@ -26,6 +25,7 @@ import type {
 } from './types';
 
 import { testAction, testAssign, testSend } from './actions';
+import { SimulatedClock } from './clock';
 import { testDelay } from './delay';
 import { testGuard } from './guard';
 import { sleep } from './helpers';
