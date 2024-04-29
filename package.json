@@ -42,7 +42,6 @@
     "config:off": "pnpm run config --offline",
     "ci": "pnpm run config:off && pnpm run lint && pnpm run test && pnpm run build",
     "rollup": "rollup -c",
-    "prepare": "husky install",
     "build": "rm -rf lib && pnpm run rollup",
     "rm": "rm -rf node_modules pnpm-lock.yaml",
     "rinit": "pnpm run rm && pnpm run config",
