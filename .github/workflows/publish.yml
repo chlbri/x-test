@@ -66,6 +66,3 @@ jobs:
       - name: Check - not updated
         if: ${{ ! steps.publish.outputs.type }}
         run: echo "Remain the same!"
-
-      # - name: TODO => Notification
-      #   run: echo 'TODO => Build a Notification pipeline'
