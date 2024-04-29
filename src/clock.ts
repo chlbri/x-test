@@ -3,13 +3,13 @@ export interface Clock {
   clearTimeout(id: any): void;
 }
 
-
 interface SimulatedTimeout {
   start: number;
   timeout: number;
   fn: (...args: any[]) => void;
 }
-export class SimulatedClock implements SimulatedClock {
+
+export class SimulatedClock {
   private timeouts: Map<number, SimulatedTimeout> = new Map();
   private _now: number = 0;
   private _id: number = 0;
@@ -28,7 +28,7 @@ export class SimulatedClock implements SimulatedClock {
     this.timeouts.set(id, {
       start: this.now(),
       timeout,
-      fn
+      fn,
     });
     return id;
   }
@@ -57,7 +57,7 @@ export class SimulatedClock implements SimulatedClock {
         const endA = timeoutA.start + timeoutA.timeout;
         const endB = timeoutB.start + timeoutB.timeout;
         return endB > endA ? -1 : 1;
-      }
+      },
     );
 
     for (const [id, timeout] of sorted) {
