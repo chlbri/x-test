@@ -8,9 +8,6 @@ dependencies:
   '@bemedev/x-matches':
     specifier: ^0.0.3
     version: 0.0.3
-  deepmerge:
-    specifier: ^4.3.1
-    version: 4.3.1
   dequal:
     specifier: ^2.0.3
     version: 2.0.3
@@ -1066,6 +1063,7 @@ packages:
   /deepmerge@4.3.1:
     resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
     engines: {node: '>=0.10.0'}
+    dev: true
 
   /dequal@2.0.3:
     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}

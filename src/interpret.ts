@@ -30,7 +30,6 @@ import { testDelay } from './delay';
 import { testGuard } from './guard';
 import { sleep } from './helpers';
 import { testPromise } from './invokeds';
-import { mockMachine } from './mock';
 import { _expect, reFunction } from './utils';
 
 export function interpret<
@@ -72,24 +71,15 @@ export function interpret<
     TResolvedTypesMeta
   >;
 
-  type ImplMachine =
-    AreAllImplementationsAssumedToBeProvided<TResolvedTypesMeta> extends true
-      ? Machine
-      : MissingImplementationsError<TResolvedTypesMeta>;
-
   const { simulateClock, ..._options } = options;
-  const __machine = mockMachine(machine as Machine, {
-    context: (machine as Machine).context,
-    options: (machine as any).options,
-  }) as unknown as ImplMachine;
 
   const startWithClock = () => {
     if (simulateClock) {
       const clock = new SimulatedClock();
-      const service = _interpret(__machine, { clock, ..._options });
+      const service = _interpret(machine, { clock, ..._options });
       return service;
     }
-    const service = _interpret(__machine, { ..._options });
+    const service = _interpret(machine, { ..._options });
     return service;
   };
 
