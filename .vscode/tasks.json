@@ -3,6 +3,26 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "pnpm:install",
+      "type": "npm",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "new",
+        "clear": false,
+        "close": true
+      },
+      "script": "config",
+      "isBackground": true,
+      "detail": "Install deps",
+      "hide": true,
+      "runOptions": {
+        "runOn": "folderOpen",
+        "instanceLimit": 1
+      }
+    },
+    {
       "label": "pnpm:build",
       "type": "npm",
       "presentation": {
@@ -17,6 +37,7 @@
       "isBackground": true,
       "detail": "Build the libary with npm",
       "hide": true,
+      "dependsOn":"pnpm:install",
       "runOptions": {
         "runOn": "folderOpen",
         "instanceLimit": 1
