@@ -19,22 +19,30 @@ export type SubType<Base extends object, Condition> = Pick<
 type Fn<P extends any[] = any, R = any> = (...arg: P) => R;
 type KeysFn<T extends object = object> = keyof SubType<T, Fn>;
 
-function _reFunction<P extends any[] = any[], R = any>(
-  fn: Fn<P, R>,
-  bind: any,
-) {
-  return (...args: P) => fn.bind(bind)(...args) as R;
-}
-
 export function reFunction<
   T extends object = object,
   FnKey extends KeysFn<T> = KeysFn<T>,
+  Pm extends any[] = T[FnKey] extends (...args: infer P) => any
+    ? P
+    : any[],
+  Re = T[FnKey] extends (...args: any) => infer R ? R : any,
 >(object: T, fn: FnKey) {
-  const _fn = object[fn];
-  type Pm = T[FnKey] extends (...args: infer P) => any ? P : any[];
-  type Re = T[FnKey] extends (...args: any) => infer R ? R : any;
-  return _reFunction<Pm, Re>(_fn as any, object);
+  return (...args: Pm) => (object[fn] as Function)(...args) as Re;
 }
+
+// export function reReFunction<
+//   T extends object = object,
+//   FnKey extends KeysFn<T> = KeysFn<T>,
+//   Pm extends any[] = T[FnKey] extends (...args: infer P) => any
+//     ? P
+//     : any[],
+//   Re = T[FnKey] extends (...args: any) => infer R ? R : any,
+// >(object: T, fn: FnKey) {
+//   return (...args: Pm) =>
+//     () => {
+//       (object[fn] as Function)(...args) as Re;
+//     };
+// }
 
 export function _expect<T>(actual: T, expected: T, error = defaultError) {
   const diffs = dequal(actual, expected);
