@@ -38,7 +38,7 @@ describe('Workflows', () => {
     });
   };
 
-  describe('Workflow - 1', () => {
+  describe('Workflow - 1', ({ sequential: test }) => {
     usePrepareTest();
 
     test('#1 State is "idle"', () => {
