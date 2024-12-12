@@ -12,7 +12,6 @@ export default {
     '@bemedev/x-matches',
     'xstate',
     'xstate/es/SimulatedClock.js',
-    'deepmerge',
     'deep-diff',
   ],
   output: [
