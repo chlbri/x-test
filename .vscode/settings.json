@@ -5,5 +5,8 @@
   },
   "task.allowAutomaticTasks": "on",
   "githubPullRequests.ignoredPullRequestBranches": ["dev"],
-  "vitest.commandLine": "pnpm test:watch"
+  "vitest.commandLine": "pnpm test:watch",
+  "github-actions.workflows.pinned.workflows": [
+    ".github/workflows/publish.yml"
+  ]
 }
