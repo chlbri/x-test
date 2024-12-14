@@ -67,6 +67,7 @@
   },
   "devDependencies": {
     "@bemedev/fsf": "^0.7.3",
+    "@rollup/plugin-terser": "^0.4.4",
     "@types/deep-diff": "^1.0.5",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",

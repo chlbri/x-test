@@ -7,6 +7,7 @@ import typescript from 'rollup-plugin-typescript2';
 export default {
   input: 'src/index.ts',
   plugins: [tsConfigPaths(), typescript()],
+
   external: [
     'dequal',
     '@bemedev/x-matches',
